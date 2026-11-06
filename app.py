@@ -1,44 +1,62 @@
 """
-Sahaaya AI (सहाय) — Inclusive Multimodal Assistive Technology Platform for India
-Streamlit Cloud & Real-Time Application with LLM RAG Copilot, Computer Vision & Multilingual Audio.
+Sahaaya AI (सहाय) — Accessibility Without Barriers
+100% Pure Python Assistive Platform for India.
+Integrated with LLM & RAG Copilot, Computer Vision, Currency Classifier,
+ISL Education Studio, Indian AAC Board, and Classroom Assessment Engine.
 """
 
-import os
 import streamlit as st
 from PIL import Image
-import numpy as np
 
-# Import Sahaaya RAG Engine
+# 100% Pure Python Engine Imports
 from rag_engine import SahaayaRAGEngine
+from cv_engine import SahaayaVisionEngine
+from currency_engine import SahaayaCurrencyEngine
+from isl_engine import SahaayaISLEngine
+from aac_engine import SahaayaAACEngine
+from classroom_engine import SahaayaClassroomEngine
 
-# Set Page Config
+# Streamlit Page Configuration
 st.set_page_config(
-    page_title="Sahaaya AI (सहाय) — Accessibility Without Barriers",
+    page_title="Sahaaya AI (सहाय) — 100% Python Assistive Platform",
     page_icon="🇮🇳",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Initialize RAG Engine in cache
+# Initialize Python Engines in Streamlit Cache
 @st.cache_resource
-def get_rag_engine():
-    return SahaayaRAGEngine(kb_dir="knowledge_base")
+def load_all_engines():
+    return {
+        "rag": SahaayaRAGEngine(kb_dir="knowledge_base"),
+        "vision": SahaayaVisionEngine(),
+        "currency": SahaayaCurrencyEngine(),
+        "isl": SahaayaISLEngine(),
+        "aac": SahaayaAACEngine(),
+        "classroom": SahaayaClassroomEngine()
+    }
 
-rag = get_rag_engine()
+engines = load_all_engines()
+rag = engines["rag"]
+vision = engines["vision"]
+currency = engines["currency"]
+isl = engines["isl"]
+aac = engines["aac"]
+classroom = engines["classroom"]
 
 # --- ACCESSIBILITY CUSTOM CSS ---
 st.markdown("""
 <style>
-    /* High contrast accessible styling */
     .stApp {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
     }
     .brand-header {
         background: linear-gradient(135deg, #00796B 0%, #004D40 100%);
         color: white;
-        padding: 20px 24px;
+        padding: 22px 26px;
         border-radius: 12px;
         margin-bottom: 20px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
     }
     .brand-title {
         font-size: 2.2rem;
@@ -51,25 +69,18 @@ st.markdown("""
     .brand-badge {
         background: #FFB300;
         color: #000;
-        padding: 4px 12px;
+        padding: 4px 14px;
         border-radius: 6px;
         font-size: 1rem;
         font-weight: 900;
     }
-    .stat-pill {
-        background: #E0F2F1;
-        border-left: 4px solid #00796B;
-        padding: 10px 14px;
-        border-radius: 6px;
-        margin: 6px 0;
-    }
     .citation-box {
         background: #F1F5F9;
-        border: 1px solid #CBD5E1;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 0.88rem;
-        margin-top: 10px;
+        border-left: 4px solid #00796B;
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        margin-top: 12px;
     }
     .flip-card-view {
         background: #FEF3C7;
@@ -80,6 +91,20 @@ st.markdown("""
         transform: rotate(180deg);
         margin: 16px 0;
     }
+    .hazard-box-danger {
+        background: #FEE2E2;
+        border: 2px solid #DC2626;
+        padding: 14px;
+        border-radius: 8px;
+        color: #991B1B;
+    }
+    .hazard-box-safe {
+        background: #DCFCE7;
+        border: 2px solid #16A34A;
+        padding: 14px;
+        border-radius: 8px;
+        color: #166534;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,16 +113,14 @@ with st.sidebar:
     st.image("https://images.openai.com/static-rsc-4/hLQKrAZLCbvXvuBaUe6o1lNEGmiO0_cviiQoTMN_aZsbxoJYmpePg7NQA0qYqw1AOW88E5l_C3U0XzLR2ATiMlFBUkxWic56hpf3PZIq5amdva7zOG8aWuJpH9Q0N_bGhZlaBJOqPsJqrXxj9LAkpLxnF4WCdieLkkefM1i4lXUt4YVa8gn0t403oaxNQHK5?purpose=inline", use_container_width=True)
     st.title("⚙️ Assistive Controls")
 
-    # Language Selector
     target_lang = st.selectbox(
         "🌐 Voice & Interface Language",
         ["Hindi", "English", "Tamil", "Telugu", "Kannada", "Bengali", "Malayalam", "Marathi", "Gujarati"],
         index=0
     )
 
-    # Adaptive Profile
     disability_profile = st.radio(
-        "👤 Adaptive Profile",
+        "👤 Adaptive Disability Profile",
         ["🌟 All Tools Mode", "👁️ Visually Impaired", "🧏 Deaf & Hard-of-Hearing", "🗣️ Nonspeaking / AAC", "🦯 Deafblind Mode"],
         index=0
     )
@@ -105,7 +128,6 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("🤖 LLM & RAG Configuration")
 
-    # API Keys from Streamlit secrets or user input
     gemini_key = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, "secrets") else ""
     openai_key = st.secrets.get("OPENAI_API_KEY", "") if hasattr(st, "secrets") else ""
 
@@ -117,10 +139,10 @@ with st.sidebar:
     elif user_openai_key:
         st.success("⚡ OpenAI GPT-4o-mini Active")
     else:
-        st.info("ℹ️ Built-in Offline Neural RAG Active (No API Key Required)")
+        st.info("ℹ️ Built-in Offline Neural RAG Active (No Key Required)")
 
     st.markdown("---")
-    st.subheader("🇮🇳 Key India Data")
+    st.subheader("🇮🇳 Key National Statistics")
     st.markdown("""
     - **Total Population**: ~1.48 Billion (Rank 1)
     - **Disability Rate**: **2.21%** (~2.68 Cr citizens)
@@ -130,15 +152,15 @@ with st.sidebar:
     - **National Helpline**: **1800-180-5129 (ALIMCO)**
     """)
 
-# --- MAIN HEADER ---
+# --- MAIN BRAND HEADER ---
 st.markdown("""
 <div class="brand-header">
     <div class="brand-title">
         <span>Sahaaya AI</span>
         <span class="brand-badge">सहाय</span>
     </div>
-    <p style="margin: 6px 0 0 0; opacity: 0.92; font-size: 1.05rem;">
-        Accessibility Without Barriers • Inclusive Multimodal Assistive Companion for India
+    <p style="margin: 6px 0 0 0; opacity: 0.94; font-size: 1.05rem;">
+        Accessibility Without Barriers • 100% Pure Python Assistive Technology Platform for India
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -148,23 +170,22 @@ tabs = st.tabs([
     "🧠 LLM & RAG Copilot",
     "💵 Currency & Coin AI",
     "🏫 Classroom & OCR",
-    "🚸 Safe Journey",
-    "🤟 ISL Studio",
+    "🚸 Street Hazard Vision",
+    "🤟 ISL Education Studio",
     "🗣️ Indian AAC Board",
-    "🌐 Live 60 FPS Camera PWA"
+    "📊 Demographics & Schemes"
 ])
 
 # ==============================================================================
-# TAB 1: LLM & RAG COPILOT
+# TAB 1: LLM & RAG ASSISTIVE COPILOT
 # ==============================================================================
 with tabs[0]:
     st.subheader("🧠 Sahaaya LLM & RAG Assistive Copilot")
     st.markdown(
         "Ask questions about **government welfare schemes (ADIP, UDID, RPwD Act 2016)**, "
-        "medical and educational accommodations, and assistive technology comparisons grounded in verified Indian demographic data."
+        "medical accommodations, or technology gap fixes. Grounded in verified Indian data."
     )
 
-    # Prompt presets
     col_p1, col_p2 = st.columns(2)
     with col_p1:
         if st.button("📋 How do I get free hearing aids / smart canes under ADIP Scheme?"):
@@ -194,7 +215,6 @@ with tabs[0]:
 
             st.markdown(rag_res["answer"])
 
-            # Sources Citation Box
             st.markdown(f"""
             <div class="citation-box">
                 <b>📚 Grounded Sources Cited:</b> {', '.join(rag_res['sources'])}<br>
@@ -202,7 +222,6 @@ with tabs[0]:
             </div>
             """, unsafe_allow_html=True)
 
-            # Audio Playback
             audio_fp = rag.text_to_speech_audio(rag_res["answer"], target_lang)
             if audio_fp:
                 st.audio(audio_fp, format="audio/mp3")
@@ -211,9 +230,9 @@ with tabs[0]:
 # TAB 2: RUPEE CURRENCY & COIN AI IDENTIFIER
 # ==============================================================================
 with tabs[1]:
-    st.subheader("💵 Indian Rupee Banknote & Coin AI Identifier")
+    st.subheader("💵 Indian Rupee Banknote & Coin AI Identifier (Pure Python)")
     st.markdown(
-        "Fills the critical gaps of the RBI MANI app by identifying **both paper banknotes AND coins** "
+        "Solves the RBI MANI app shortcomings by identifying **banknotes AND coins** "
         "(including the 12-sided ₹20 dodecagon coin) with anti-counterfeit verification checklists."
     )
 
@@ -222,94 +241,68 @@ with tabs[1]:
     with curr_col1:
         cam_image = st.camera_input("📸 Point camera at Indian Banknote or Coin")
         uploaded_image = st.file_uploader("Or upload currency photo", type=["jpg", "jpeg", "png"])
-
         target_img = cam_image or uploaded_image
 
     with curr_col2:
         if target_img:
             img = Image.open(target_img)
-            st.image(img, caption="Viewfinder Snapshot", use_container_width=True)
+            st.image(img, caption="Viewfinder Image", use_container_width=True)
 
-            # Simple Color Analysis
-            arr = np.array(img)
-            avg_color = arr.mean(axis=(0, 1))
+            res = currency.classify_image(img)
 
-            # Heuristic match
-            r, g, b = avg_color[:3]
-            if r > g and r > b and r > 110 and b < 90:
-                detected_curr = "₹10 Note (Chocolate Brown - Sun Temple Konark)"
-                haptic = "1 Short Pulse"
-                checklist = "5 angular bleed lines on right, Konark wheel motif."
-            elif b > r and b > 100:
-                detected_curr = "₹50 Note (Fluorescent Blue - Hampi with Chariot)"
-                haptic = "3 Short Pulses"
-                checklist = "Square tactile symbol above Ashoka Pillar emblem."
-            elif abs(r - g) < 20 and abs(g - b) < 20:
-                detected_curr = "₹500 Note (Stone Grey - Red Fort Delhi)"
-                haptic = "5 Heavy Pulses"
-                checklist = "Circle tactile mark on right, 5 angular bleed lines, color-shifting green-to-blue thread."
-            elif r > 130 and g > 130 and b < 90:
-                detected_curr = "₹200 Note (Bright Yellow - Sanchi Stupa)"
-                haptic = "4 Short Pulses"
-                checklist = "H-mark with two small circles on right border."
-            else:
-                detected_curr = "₹100 Note (Lavender - Rani ki Vav)"
-                haptic = "4 Pulses"
-                checklist = "Triangle tactile mark on right, 4 angular bleed lines on both sides."
+            st.success(f"### Detected: {res['denomination']} ({res['confidence']}% confidence)")
+            st.info(f"**Series & Theme**: {res['series']} • {res['color']} • {res['motif']}")
+            st.warning(f"**📳 Tactile Haptic Vibration Pattern**: {res['haptic_pattern']}")
+            st.write(f"**🔍 Key Tactile Mark**: {res['tactile_mark']}")
 
-            st.success(f"### Detected: {detected_curr}")
-            st.info(f"**📳 Tactile Haptic Vibration Pattern**: {haptic}")
-            st.markdown(f"**🛡️ Anti-Counterfeit Checklist:** {checklist}")
+            st.markdown("#### 🛡️ Anti-Counterfeit Verification Checklist:")
+            for check in res["security_checklist"]:
+                st.markdown(f"- ✅ {check}")
 
-            audio_fp = rag.text_to_speech_audio(f"Identified {detected_curr}. Please verify tactile bleed lines.", target_lang)
+            audio_fp = rag.text_to_speech_audio(f"Identified {res['denomination']}. {res['color']}. Verify tactile bleed lines.", target_lang)
             if audio_fp:
                 st.audio(audio_fp, format="audio/mp3")
 
         else:
             st.info("💡 Position currency in camera view above, or select a test denomination below:")
             pick_curr = st.selectbox(
-                "Quick Denomination Selector:",
-                ["₹500 Note (Stone Grey)", "₹200 Note (Bright Yellow)", "₹100 Note (Lavender)", "₹50 Note (Fluorescent Blue)", "₹20 Coin (12-sided Dodecagon)", "₹10 Bimetallic Coin"]
+                "Manual Denomination Inspector:",
+                ["500", "200", "100", "50", "20", "10"],
+                format_func=lambda x: currency.CURRENCY_SPECS[x]["name"]
             )
-            st.write(f"Showing specs for: **{pick_curr}**")
+            spec = currency.CURRENCY_SPECS[pick_curr]
+            st.write(f"**Denomination**: {spec['name']}")
+            st.write(f"**Series**: {spec['series']} • {spec['color']} • {spec['motif']}")
+            st.write(f"**Tactile Mark**: {spec['tactile_mark']}")
+            for check in spec["security_checklist"]:
+                st.write(f"- ✅ {check}")
 
 # ==============================================================================
-# TAB 3: CLASSROOM & MEDICINE OCR
+# TAB 3: ACCESSIBLE CLASSROOM & OCR
 # ==============================================================================
 with tabs[2]:
-    st.subheader("🏫 Accessible Classroom Worksheet & Medicine OCR")
+    st.subheader("🏫 Accessible Indian Classroom & OCR Engine (Pure Python)")
     st.markdown(
-        "Upload or snap a textbook worksheet, circular, or medicine strip. "
-        "The AI extracts text, generates simplified summaries, and creates automated comprehension quizzes."
+        "Scan worksheets, textbook paragraphs, or school circulars. "
+        "Listen to spoken read-alouds, simplified summaries, and test comprehension with auto-generated quizzes."
     )
 
-    ocr_col1, ocr_col2 = st.columns([1, 1])
+    cls_col1, cls_col2 = st.columns([1, 1])
 
-    with ocr_col1:
-        lesson_choice = st.selectbox(
-            "Load Sample Indian Lesson / Notice:",
-            [
-                "Class 5 Science: Photosynthesis (प्रकाश संश्लेषण)",
-                "Class 8 Civics: RPwD Act 2016 Rights & Reservations",
-                "Class 4 Math: Everyday Kirana Bill & Calculation",
-                "Medicine Prescription: Paracetamol 500mg Dosage"
-            ]
-        )
-
-        sample_texts = {
-            "Class 5 Science: Photosynthesis (प्रकाश संश्लेषण)": "Photosynthesis is the process by which green plants prepare their own food using sunlight, water from soil, and carbon dioxide from the air. Leaves contain chlorophyll which absorbs solar energy and gives them their green color. During photosynthesis, oxygen is released into the atmosphere.",
-            "Class 8 Civics: RPwD Act 2016 Rights & Reservations": "The Rights of Persons with Disabilities (RPwD) Act 2016 guarantees equal opportunity, non-discrimination, and universal design in public infrastructure. It mandates 4% reservation in government jobs and 5% reservation in higher education for benchmark disabilities.",
-            "Class 4 Math: Everyday Kirana Bill & Calculation": "Rahul purchased 1 kg rice for ₹50, 1 liter milk for ₹28, and washing soap for ₹22. Total cost = 50 + 28 + 22 = ₹100. Rahul handed a ₹200 note to the shopkeeper. Change to receive = 200 - 100 = ₹100.",
-            "Medicine Prescription: Paracetamol 500mg Dosage": "Paracetamol 500 mg. Take 1 tablet twice daily after meals with water. Do not exceed 4 tablets in 24 hours. Keep out of reach of children. Overuse damages liver."
-        }
+    with cls_col1:
+        selected_title = st.selectbox("📑 Select Preloaded Indian Lesson:", classroom.get_lesson_titles())
+        lesson_data = classroom.get_lesson(selected_title)
 
         worksheet_text = st.text_area(
-            "Worksheet or OCR Text Content:",
-            value=sample_texts[lesson_choice],
+            "Worksheet Text Content:",
+            value=lesson_data["text"],
             height=160
         )
 
-    with ocr_col2:
+        st.markdown(f"**💡 Simplified Student Summary**: {lesson_data['simplified']}")
+        st.write(f"**🤟 Related ISL Concepts**: {', '.join(lesson_data['related_isl_signs'])}")
+
+    with cls_col2:
         speed = st.slider("🔊 Readout Speed", 0.5, 1.5, 1.0, 0.1)
         if st.button("🔊 Read Worksheet Aloud"):
             audio_fp = rag.text_to_speech_audio(worksheet_text, target_lang)
@@ -318,75 +311,65 @@ with tabs[2]:
 
         st.markdown("---")
         st.subheader("📝 Automated Comprehension Quiz")
-        if "Photosynthesis" in lesson_choice:
-            st.write("1. What gas do green plants release during photosynthesis?")
-            ans1 = st.radio("Select answer:", ["Carbon Dioxide", "Oxygen", "Nitrogen"], key="q1")
-            if ans1 == "Oxygen":
-                st.success("✅ Correct! Oxygen is released into the atmosphere.")
-        elif "RPwD" in lesson_choice:
-            st.write("1. What percent reservation in government jobs is mandated under RPwD Act 2016?")
-            ans2 = st.radio("Select answer:", ["2%", "4%", "10%"], key="q2")
-            if ans2 == "4%":
-                st.success("✅ Correct! 4% reservation is mandated.")
-        else:
-            st.write("1. What was the total amount Rahul had to pay?")
-            ans3 = st.radio("Select answer:", ["₹100", "₹150", "₹200"], key="q3")
-            if ans3 == "₹100":
-                st.success("✅ Correct! 50 + 28 + 22 = ₹100.")
+        for i, q in enumerate(lesson_data["questions"]):
+            st.write(f"**Q{i+1}: {q['q']}**")
+            pick = st.radio(f"Select answer for Q{i+1}:", q["options"], key=f"q_{selected_title}_{i}")
+            if pick == q["correct"]:
+                st.success(f"✅ {q['feedback']}")
 
 # ==============================================================================
-# TAB 4: SAFER JOURNEY & STREET MOBILITY
+# TAB 4: STREET HAZARD COMPUTER VISION
 # ==============================================================================
 with tabs[3]:
-    st.subheader("🚸 Safer Journey Companion (Indian Street Mobility)")
+    st.subheader("🚸 Street Hazard Computer Vision & Mobility (Pure Python)")
     st.markdown(
-        "Supplements white canes and mobility aids by simulating warnings for real Indian street hazards: "
-        "**open potholes, open storm drains (nalas), low hanging overhead wires, and stray animals**."
+        "Supplements white canes and mobility aids by analyzing camera snapshots for "
+        "**open potholes, storm drains (nalas), low hanging overhead wires, and obstacles**."
     )
 
-    j_col1, j_col2 = st.columns([1, 1])
-    with j_col1:
-        st.write("### 🧪 Simulate Indian Street Obstacles")
-        hazard_pick = st.radio(
-            "Select Scenario to Test Multi-Modal Alarms:",
-            ["🟢 Path Clear", "⚠️ Open Pothole / Broken Slab", "🚨 Open Storm Drain / Nala", "⚡ Low Hanging Live Wire", "🐄 Stray Cattle on Footpath"]
-        )
+    v_col1, v_col2 = st.columns([1, 1])
 
-    with j_col2:
-        if hazard_pick == "🟢 Path Clear":
-            st.success("### 🟢 Path Status: Clear Ahead")
-            st.write("No low hanging cables or ground drop-offs detected.")
-        elif hazard_pick == "⚠️ Open Pothole / Broken Slab":
-            st.warning("### ⚠️ Caution: Pothole / Broken Slab 1.5m Ahead")
-            st.write("📳 Haptic Pattern: `[250ms, 100ms, 250ms]`")
-            audio_fp = rag.text_to_speech_audio("Caution: Pothole detected one point five meters ahead. Step left.", target_lang)
+    with v_col1:
+        hazard_cam = st.camera_input("📸 Capture Street Walking Path")
+        hazard_file = st.file_uploader("Or upload street scene photo", type=["jpg", "jpeg", "png"], key="hazard_upload")
+        active_hazard_img = hazard_cam or hazard_file
+
+    with v_col2:
+        if active_hazard_img:
+            pil_img = Image.open(active_hazard_img)
+            analysis = vision.analyze_street_image(pil_img)
+
+            st.image(analysis["annotated_image"], caption="Annotated Hazard Inspection", use_container_width=True)
+
+            if analysis["is_danger"]:
+                st.markdown(f"""
+                <div class="hazard-box-danger">
+                    <h3>{analysis['primary_status']}</h3>
+                    <p><b>Recommended Action:</b> {analysis['primary_action']}</p>
+                    <p><b>Tactile Haptic Pattern:</b> {analysis['primary_haptic']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="hazard-box-safe">
+                    <h3>{analysis['primary_status']}</h3>
+                    <p>{analysis['primary_action']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+            audio_fp = rag.text_to_speech_audio(f"{analysis['primary_status']}. {analysis['primary_action']}", target_lang)
             if audio_fp:
                 st.audio(audio_fp, format="audio/mp3")
-        elif hazard_pick == "🚨 Open Storm Drain / Nala":
-            st.error("### 🚨 DANGER: Open Storm Drain (Nala) on Right")
-            st.write("📳 Haptic Pattern: `[300ms, 80ms, 300ms, 80ms, 500ms]`")
-            audio_fp = rag.text_to_speech_audio("Danger! Open storm drain nala on your right. Stop and move left.", target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
-        elif hazard_pick == "⚡ Low Hanging Live Wire":
-            st.error("### ⚡ Warning: Low Hanging Wire at Chest/Head Height")
-            st.write("📳 Haptic Pattern: `[400ms, 150ms, 400ms]`")
-            audio_fp = rag.text_to_speech_audio("Warning: Low hanging electrical wire overhead. Duck or detour.", target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
-        elif hazard_pick == "🐄 Stray Cattle on Footpath":
-            st.warning("### 🐄 Caution: Large Animal on Footpath 3m Ahead")
-            audio_fp = rag.text_to_speech_audio("Caution: Stationary animal on pedestrian footpath.", target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
+        else:
+            st.info("💡 Position camera toward your walking path or upload a test street image.")
 
     st.markdown("---")
-    st.subheader("🆘 Emergency SOS Beacon & Geolocation")
+    st.subheader("🆘 Emergency SOS Beacon & Geolocation Broadcast")
     sos_col1, sos_col2 = st.columns(2)
     with sos_col1:
-        if st.button("🚨 TRIGGER SOS BEACON", type="primary"):
+        if st.button("🚨 TRIGGER EMERGENCY SOS BEACON", type="primary"):
             st.error("🚨 EMERGENCY SOS BROADCAST ACTIVATED!")
-            st.write("Vibrating Morse SOS code: `••• --- •••`")
+            st.write("Vibrating Morse SOS pattern: `••• --- •••`")
             st.audio(rag.text_to_speech_audio("Emergency SOS beacon activated! Assisting person nearby.", "en"), format="audio/mp3")
     with sos_col2:
         maps_link = "https://maps.google.com/?q=28.6139,77.2090"
@@ -397,121 +380,108 @@ with tabs[3]:
 # TAB 5: INDIAN SIGN LANGUAGE STUDIO
 # ==============================================================================
 with tabs[4]:
-    st.subheader("🤟 Indian Sign Language (ISL) Learning Studio")
+    st.subheader("🤟 Indian Sign Language (ISL) Education Studio (Pure Python)")
     st.markdown(
         "Standardized curriculum aligned with **ISLRTC & NCERT Channel 31** guidelines. "
-        "Learn essential gestures for Indian classrooms, everyday services, and emergencies."
+        "Learn essential gestures for Indian classrooms, healthcare, transit, and emergencies."
     )
 
-    isl_cat = st.selectbox("Category:", ["Daily Greetings & Essentials", "Emergency Signs", "School & Learning", "Numbers 1-10"])
+    selected_cat = st.selectbox("Select ISL Category:", isl.get_categories())
+    signs_list = isl.get_signs_by_category(selected_cat)
 
-    isl_items = {
-        "Daily Greetings & Essentials": [
-            {"sign": "Namaste (नमस्ते)", "desc": "Both palms joined together in front of chest with a slight respectful head nod.", "icon": "🙏"},
-            {"sign": "Thank You (धन्यवाद)", "desc": "Fingertips of right hand touch lips/chin and move outwards forward with open palm.", "icon": "💐"},
-            {"sign": "Water (पानी)", "desc": "W-hand shape near mouth, or cupped hand moving to mouth as drinking.", "icon": "💧"},
-            {"sign": "Food (खाना)", "desc": "Fingertips bunched together tapping lips twice.", "icon": "🍚"}
-        ],
-        "Emergency Signs": [
-            {"sign": "Help (सहायता)", "desc": "Left flat palm facing up, right closed fist with thumb up placed on left palm, moving upward together.", "icon": "🆘"},
-            {"sign": "Doctor (डॉक्टर)", "desc": "Right index and middle fingertips tap inner pulse point of left wrist.", "icon": "🩺"},
-            {"sign": "Medicine (दवा)", "desc": "Right middle finger grinds in the center of open left palm like crushing a tablet.", "icon": "💊"},
-            {"sign": "Danger / Stop (खतरा)", "desc": "Firm open right hand thrust forward vertically in an abrupt stopping gesture.", "icon": "🛑"}
-        ],
-        "School & Learning": [
-            {"sign": "School (विद्यालय)", "desc": "Right flat palm claps on left flat palm twice horizontally.", "icon": "🏫"},
-            {"sign": "Teacher (अध्यापक)", "desc": "Both hands pinch at forehead, move forward opening into flat palms downwards.", "icon": "👨‍🏫"},
-            {"sign": "Book (किताब)", "desc": "Both flat palms pressed together then opened outwards like a book cover.", "icon": "📖"}
-        ],
-        "Numbers 1-10": [
-            {"sign": "Number 1 (एक)", "desc": "Right index finger pointed upwards, other fingers closed in fist.", "icon": "☝️"},
-            {"sign": "Number 2 (दो)", "desc": "Right index and middle finger pointing up in V-shape.", "icon": "✌️"},
-            {"sign": "Number 5 (पाँच)", "desc": "Open palm facing forward with all 5 fingers spread.", "icon": "🖐️"}
-        ]
-    }
-
-    cols = st.columns(len(isl_items[isl_cat]))
-    for idx, item in enumerate(isl_items[isl_cat]):
+    cols = st.columns(len(signs_list))
+    for idx, item in enumerate(signs_list):
         with cols[idx]:
             st.markdown(f"""
-            <div style="background:#E6F0ED; padding:16px; border-radius:10px; border:2px solid #00796B; text-align:center;">
-                <div style="font-size:2.5rem;">{item['icon']}</div>
-                <h4 style="margin:8px 0;">{item['sign']}</h4>
-                <p style="font-size:0.85rem; color:#48656E;">{item['desc']}</p>
+            <div style="background:#E6F0ED; padding:16px; border-radius:10px; border:2px solid #00796B; text-align:center; min-height:220px;">
+                <div style="font-size:2.6rem;">{item['icon']}</div>
+                <h4 style="margin:8px 0; color:#004D40;">{item['name']}</h4>
+                <p style="font-size:0.85rem; color:#48656E;">{item['instructions']}</p>
             </div>
             """, unsafe_allow_html=True)
-            if st.button(f"🔊 Listen", key=f"isl_{idx}"):
-                audio_fp = rag.text_to_speech_audio(f"{item['sign']}. {item['desc']}", target_lang)
+            if st.button("🔊 Listen", key=f"isl_speak_{idx}"):
+                audio_fp = rag.text_to_speech_audio(f"{item['name']}. {item['instructions']}", target_lang)
                 if audio_fp:
                     st.audio(audio_fp, format="audio/mp3")
+
+    st.markdown("---")
+    st.subheader("🎯 Test Your Knowledge: Randomized ISL Practice Quiz")
+    if st.button("🎲 Generate New Question"):
+        st.session_state["isl_quiz"] = isl.generate_quiz_question()
+
+    active_quiz = st.session_state.get("isl_quiz", isl.generate_quiz_question())
+    st.write(f"### {active_quiz['question']}")
+    quiz_cols = st.columns(len(active_quiz["options"]))
+    for i, opt in enumerate(active_quiz["options"]):
+        with quiz_cols[i]:
+            if st.button(f"{opt['icon']} {opt['name']}", key=f"quiz_opt_{i}"):
+                if opt["id"] == active_quiz["correct_id"]:
+                    st.success("🎉 Correct Answer! Excellent.")
+                else:
+                    st.error(f"❌ Not quite. {active_quiz['explanation']}")
 
 # ==============================================================================
 # TAB 6: AAC INDIAN SITUATION BOARD
 # ==============================================================================
 with tabs[5]:
-    st.subheader("🗣️ Augmentative & Alternative Communication (AAC) Indian Board")
-    st.markdown("Designed for rapid communication at clinics, auto-rickshaws, ration/kirana shops, and government offices.")
+    st.subheader("🗣️ Augmentative & Alternative Communication (AAC) Board (Pure Python)")
+    st.markdown("Rapid dialogue presets for Indian clinics, auto-rickshaws, ration/kirana shops, and government offices.")
 
-    preset = st.selectbox(
-        "Select Situation:",
-        ["🏥 Clinic / Doctor", "🛺 Auto-Rickshaw / Bus", "🛒 Kirana / Ration Shop", "🏛️ Panchayat / Post Office"]
-    )
+    chosen_sit = st.selectbox("Select Situation:", aac.get_situations())
+    phrases = aac.get_phrases(chosen_sit)
 
-    phrases = {
-        "🏥 Clinic / Doctor": [
-            "नमस्ते डॉक्टर, मुझे दो दिन से बुखार और सिरदर्द है।",
-            "क्या यह दवा खाने से पहले लेनी है या बाद में?",
-            "कृपया पर्ची पर निर्देश बड़े अक्षरों में लिख दीजिए।",
-            "मुझे इंजेक्शन से डर लगता है, क्या सिरप उपलब्ध है?"
-        ],
-        "🛺 Auto-Rickshaw / Bus": [
-            "भैया, कृपया मीटर से रेलवे स्टेशन ले चलिए।",
-            "वहाँ तक का कितना किराया होगा?",
-            "कृपया मुझे बस स्टैंड आने पर बता दीजिए।",
-            "मैं यूपीआई / फोनपे से भुगतान करूँगा।"
-        ],
-        "🛒 Kirana / Ration Shop": [
-            "भैया, 1 किलो दाल और 500 ग्राम चीनी दीजिए।",
-            "कुल कितना रुपया हुआ?",
-            "कृपया मुझे पक्का बिल दीजिए।",
-            "क्या आपके पास 500 रुपये के छुट्टे हैं?"
-        ],
-        "🏛️ Panchayat / Post Office": [
-            "मुझे यूडीआईडी (UDID) दिव्यांग पहचान पत्र का फॉर्म चाहिए।",
-            "इसके लिए कौन-से सरकारी दस्तावेज़ जमा करने होंगे?",
-            "कृपया फॉर्म भरने में मेरी सहायता कीजिए।"
-        ]
-    }
+    phrase_options = [aac.get_translated_text(p, target_lang) for p in phrases]
+    selected_dialogue = st.selectbox("Select Phrase to Display & Speak:", phrase_options)
 
-    selected_phrase = st.selectbox("Select phrase to display / speak:", phrases[preset])
-
-    st.markdown("### 🔄 180° Tabletop Flip View (Show to person across counter):")
+    st.markdown("### 🔄 180° Tabletop Flip View (Show across desk/counter):")
     st.markdown(f"""
     <div class="flip-card-view">
-        <h2 style="color:#B45309; margin:0;">{selected_phrase}</h2>
+        <h2 style="color:#B45309; margin:0;">{selected_dialogue}</h2>
     </div>
     """, unsafe_allow_html=True)
 
     if st.button("🔊 Speak Phrase Out Loud", type="primary"):
-        audio_fp = rag.text_to_speech_audio(selected_phrase, "hi")
+        audio_fp = rag.text_to_speech_audio(selected_dialogue, target_lang)
         if audio_fp:
             st.audio(audio_fp, format="audio/mp3")
 
 # ==============================================================================
-# TAB 7: LIVE 60 FPS WEBCAM PWA EMBED
+# TAB 7: INDIA DEMOGRAPHICS & SCHEMES DASHBOARD
 # ==============================================================================
 with tabs[6]:
-    st.subheader("🌐 Live 60 FPS Client-Side Computer Vision & Audio Sentinel")
-    st.markdown(
-        "Runs high-performance **TensorFlow.js COCO-SSD object tracking**, "
-        "real-time webcam hand gesture recognition, and 60 FPS audio spectrogram listeners directly in your browser."
-    )
+    st.subheader("📊 India Disability Demographics & Welfare Schemes Hub (Pure Python)")
+    st.markdown("Verified statistical landscape compiled from Census of India, NSS, LASI, and WHO-UNICEF reports.")
 
-    st.info("💡 To use full live camera and microphone streaming, ensure you access via `http://localhost:5500` or an HTTPS URL.")
+    metric_c1, metric_c2, metric_c3, metric_c4 = st.columns(4)
+    with metric_c1:
+        st.metric("Total Population", "1.48 Billion", "Global Rank #1")
+    with metric_c2:
+        st.metric("Disability Rate", "2.21%", "~2.68 Cr citizens")
+    with metric_c3:
+        st.metric("Unmet Tech Need", "70%", "WHO-UNICEF GReAT")
+    with metric_c4:
+        st.metric("Out-of-Pocket Cost", "67.4%", "Paid by Families")
 
-    # Embed local or hosted index.html
-    st.components.v1.iframe(
-        src="http://localhost:5500/index.html",
-        height=680,
-        scrolling=True
-    )
+    st.markdown("---")
+    st.subheader("Top Indian States by Disability Population Share")
+
+    state_data = {
+        "Uttar Pradesh": {"share": "15.5% - 16.5%", "blind": "~7.63 Lakh", "notes": "Steep affordability barrier; rural families lack digital tools and rely on mechanical slates."},
+        "Maharashtra": {"share": "11.05%", "blind": "High", "notes": "Significant adult workforce disability burden; rural Marathwada and Vidarbha face training gaps."},
+        "Bihar": {"share": "8.69%", "blind": "High", "notes": "Multidimensional poverty clusters; digital hearing aids (₹20k+) and cochlear implants are unaffordable."},
+        "Andhra Pradesh": {"share": "8.45%", "blind": "High", "notes": "High rural density; lack of localized Telugu assistive tools."},
+        "West Bengal": {"share": "7.52%", "blind": "High", "notes": "High elderly sensory decline (presbycusis and cataracts); urgent need for Bengali audio tools."}
+    }
+
+    for s_name, s_info in state_data.items():
+        st.markdown(f"**📍 {s_name}** — National Share: **{s_info['share']}** | Context: {s_info['notes']}")
+
+    st.markdown("---")
+    st.subheader("🏛️ Central Government Welfare Schemes & Helplines")
+    st.markdown("""
+    - **ADIP Scheme**: 100% free or subsidized smart canes, hearing aids, and wheelchairs for families with monthly income under ₹15,000.  
+      🔗 [ADIP Portal](https://adip.depwd.gov.in/) | Toll-Free ALIMCO Helpline: **1800-180-5129**
+    - **UDID Card (Swavlamban)**: Universal disability card enabling up to 75% concessions in Indian Railways.  
+      🔗 [Swavlamban Portal](https://www.swavlambancard.gov.in/)
+    - **RPwD Act 2016**: 4% government job reservation and 5% higher education reservation.
+    """)

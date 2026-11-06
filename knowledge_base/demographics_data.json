@@ -1,0 +1,47 @@
+{
+  "demographics": {
+    "total_population_estimate_2026": "1,480,560,451 (Global Rank 1, ~17.8% of world population)",
+    "population_density": "497 people per square kilometer",
+    "median_age": "29.2 years",
+    "overall_disability_percentage": "2.21% (Census 2011, NSS, LASI), representing over 26.8 million citizens",
+    "visual_impairment_seeing": "18.8% of disabled population (~0.42% of total population). In adults 45+, LASI indicates 33.8% suffer from distance vision impairment and 43% near-vision impairment.",
+    "hearing_impairment": "18.9% of disabled population (~0.42% national share). WHO clinical estimates place significant hearing loss higher at roughly 6.3%. In seniors 65+, 1 in 3 (33.3%) experience presbycusis.",
+    "speech_impairment_mute": "7.5% of disabled population (~0.16% of total population). Prevalent in early childhood (ages 5-14) during language acquisition.",
+    "top_states_by_disability_burden": [
+      {
+        "rank": 1,
+        "state": "Uttar Pradesh",
+        "national_share": "15.5% - 16.5%",
+        "visual_impairment_count": "~7.63 Lakh",
+        "key_challenges": "Highest raw population burden; low rural household incomes make digital screen readers and refreshable Braille unaffordable; dependency on basic mechanical slates."
+      },
+      {
+        "rank": 2,
+        "state": "Maharashtra",
+        "national_share": "11.05%",
+        "key_challenges": "Large working-age adult population; urban centers have tech access while rural regions like Vidarbha and Marathwada face deep gaps."
+      },
+      {
+        "rank": 3,
+        "state": "Bihar",
+        "national_share": "8.69%",
+        "key_challenges": "Steep multidimensional poverty clusters; ₹20,000+ digital hearing aids and ₹12,00,000 cochlear implants are out of reach without philanthropy."
+      },
+      {
+        "rank": 4,
+        "state": "Andhra Pradesh",
+        "national_share": "8.45%",
+        "key_challenges": "High rural concentration; severe shortage of Telugu-first accessible screen reading tools."
+      },
+      {
+        "rank": 5,
+        "state": "West Bengal",
+        "national_share": "7.52%",
+        "key_challenges": "High age-related sensory decline (cataracts and presbycusis); urgent need for Bengali audio and tactile resources."
+      }
+    ],
+    "unmet_technology_need": "70% to 71% of people with disabilities in India lack access to necessary assistive hardware and software (WHO-UNICEF GReAT report).",
+    "out_of_pocket_crisis": "67.4% of all assistive technology items acquired in India must be paid for completely out-of-pocket by low-income families.",
+    "rural_divide": "68% of India's disabled population resides in rural areas with minimal tech training centers or repair infrastructure."
+  }
+}

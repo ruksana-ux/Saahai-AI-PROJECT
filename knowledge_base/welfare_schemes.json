@@ -1,0 +1,57 @@
+{
+  "schemes_and_rights": [
+    {
+      "name": "Rights of Persons with Disabilities (RPwD) Act 2016",
+      "type": "National Legislation",
+      "overview": "India's landmark rights-based statute covering 21 recognized disabilities, aligned with the UNCRPD.",
+      "key_provisions": [
+        "Mandatory 4% reservation in government jobs for benchmark disabilities.",
+        "5% reservation in government and aided higher education institutions.",
+        "Strict penalties and fines for discrimination or non-compliance with universal design standards.",
+        "Mandatory physical and digital accessibility in public transport, railway stations, airports, and government websites.",
+        "February 2026 notification: Mandatory accessibility guidelines for OTT streaming platforms (audio descriptions for blind, closed captions/ISL for deaf)."
+      ]
+    },
+    {
+      "name": "ADIP Scheme (Assistance to Disabled Persons for Purchase/Fitting of Aids and Appliances)",
+      "type": "Central Government Subsidy & Distribution Scheme",
+      "implementing_agency": "Ministry of Social Justice and Empowerment / ALIMCO",
+      "eligibility": "Indian citizens with 40% benchmark disability. Monthly income below ₹15,000 receives 100% free aids; monthly income ₹15,001 - ₹20,000 receives 50% subsidy.",
+      "covered_devices": [
+        "Smart white canes with ultrasonic obstacle sensors (SmartCane).",
+        "Braille kits, slates, styluses, and refreshable Braille readers (Orbit Reader 20 / Hexis).",
+        "Digital behind-the-ear (BTE) hearing aids for kids and adults.",
+        "Full funding for pediatric cochlear implant surgeries (up to ₹6,00,000 per child under age 5).",
+        "Battery-powered motorized tricycles and wheelchairs."
+      ],
+      "portal_url": "https://adip.depwd.gov.in/",
+      "national_helpline": "1800-180-5129"
+    },
+    {
+      "name": "UDID Card (Unique Disability ID / Swavlamban Card)",
+      "type": "National Digital Identity Card",
+      "overview": "Single universal electronic card verifying disability percentage across all states in India without needing multiple medical certificates.",
+      "benefits": [
+        "Concessional travel in Indian Railways (up to 75% off) and State Road Transport buses.",
+        "Direct benefit transfers (DBT) for disability pensions.",
+        "Expedited processing for education scholarships and assistive device camps.",
+        "Digital verification via Aadhaar."
+      ],
+      "portal_url": "https://www.swavlambancard.gov.in/"
+    },
+    {
+      "name": "Sugamya Bharat Abhiyan (Accessible India Campaign)",
+      "type": "Infrastructure Campaign",
+      "focus": [
+        "Built environment accessibility: Retrofitting ramps, tactile paving (guiding & warning tiles), braille signage in 1,000+ railway stations and government collectorates.",
+        "Transportation: Lower-floor buses and auditory announcements in metro trains.",
+        "Information & Communication: GIGW compliance (Guidelines for Indian Government Websites) ensuring screen-reader accessibility."
+      ]
+    },
+    {
+      "name": "ISLRTC & NCERT Educational Channel 31",
+      "type": "Education & Sign Language Standardization",
+      "overview": "Standardized Indian Sign Language (ISL) repository exceeding 3,000 signs, providing video textbooks for primary and secondary school grades."
+    }
+  ]
+}

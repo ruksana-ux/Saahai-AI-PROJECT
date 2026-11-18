@@ -3,7 +3,7 @@ Sahaaya AI — Accessible Indian Classroom & OCR Engine (Pure Python)
 Worksheet text summarizer, read-aloud preparer, and automated student comprehension tester.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class SahaayaClassroomEngine:

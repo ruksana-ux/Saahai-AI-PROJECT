@@ -5,7 +5,7 @@ and interactive sign quiz generator.
 """
 
 import random
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class SahaayaISLEngine:

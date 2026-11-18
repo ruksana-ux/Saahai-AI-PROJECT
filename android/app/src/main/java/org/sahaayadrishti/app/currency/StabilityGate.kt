@@ -24,6 +24,10 @@ class StabilityGate(
 
     /** Returns the label to announce, or `null` when nothing should be said. */
     fun offer(label: String, now: Long): String? {
+        // A disagreement breaks the run. Keeping older frames of the previous
+        // label would let three non-consecutive sightings announce a note the
+        // user has already moved away from.
+        if (recent.isNotEmpty() && recent.last() != label) recent.clear()
         recent.addLast(label)
         while (recent.size > windowSize) recent.removeFirst()
 

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "in.sahaayadrishti.app"
+    namespace = "org.sahaayadrishti.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "in.sahaayadrishti.app"
+        applicationId = "org.sahaayadrishti.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

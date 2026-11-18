@@ -4,4 +4,4 @@
 -dontwarn org.tensorflow.lite.**
 
 # Kotlin data classes used with org.json parsing keep their names.
--keepclassmembers class in.sahaayadrishti.app.schemes.** { *; }
+-keepclassmembers class org.sahaayadrishti.app.schemes.** { *; }

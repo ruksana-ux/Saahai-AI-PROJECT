@@ -64,6 +64,17 @@ DEFAULT_LLM_MODEL = os.getenv("SAHAAYA_LLM_MODEL", "gemini-2.0-flash")
 #: Below this cosine score the engine refuses to answer from the knowledge base.
 MIN_RETRIEVAL_SCORE = 0.08
 
+#: Function words that carry no evidence. A query made only of these must not
+#: retrieve a scheme, and a single incidental shared word is not proof that the
+#: question is about that document. Mirrors ``scheme_engine.STOPWORDS``.
+STOPWORDS = {
+    "a", "about", "also", "an", "and", "any", "are", "as", "at", "be", "by", "can", "do",
+    "does", "exactly", "for", "from", "get", "give", "how", "i", "if", "in", "into", "is",
+    "it", "its", "me", "much", "my", "no", "not", "of", "on", "or", "per", "please", "some",
+    "that", "the", "there", "these", "this", "those", "to", "under", "what", "when", "where",
+    "which", "who", "will", "with", "you",
+}
+
 #: Conservative cap so a long document cannot exhaust memory in a demo.
 MAX_TTS_CHARS = 6000
 TTS_CHUNK_CHARS = 180
@@ -209,6 +220,13 @@ class SahaayaRAGEngine:
 
     # ------------------------------------------------------------------ index
     def build_index(self) -> None:
+        # Acronyms in a chunk title (ADIP, UDID, RPwD) are explicit references to
+        # that document. A query that names one is evidence enough on its own.
+        self.aliases: set[str] = set()
+        for chunk in self.chunks:
+            for word in re.findall(r"[A-Za-z]*[A-Z][A-Za-z]*[A-Z][A-Za-z]*", chunk.get("title", "")):
+                if len(word) >= 3:
+                    self.aliases.add(word.lower())
         if not self.chunks:
             self.idf = {}
             self.chunk_vectors = []
@@ -267,6 +285,25 @@ class SahaayaRAGEngine:
         return results
 
     # ---------------------------------------------------------------- answers
+    def _has_enough_evidence(self, query: str, chunk: Dict[str, Any]) -> bool:
+        """Does the query share real content with this chunk?
+
+        A single incidental shared word ("capital" in "capital subsidy") is not
+        evidence that an unrelated question is covered by this document. Require
+        two distinct content words, or one content word when the query itself
+        is a single term such as "UDID".
+        """
+        query_tokens = {token for token in self.tokenize(query) if token not in STOPWORDS}
+        if not query_tokens:
+            return False
+        if query_tokens & self.aliases:
+            return True
+        chunk_text = f"{chunk.get('title', '')} {chunk.get('content', '')}"
+        overlap = query_tokens & set(self.tokenize(chunk_text))
+        if len(query_tokens) == 1:
+            return bool(overlap)
+        return len(overlap) >= 2
+
     def generate_answer(
         self,
         query: str,
@@ -277,7 +314,11 @@ class SahaayaRAGEngine:
         retrieved = self.retrieve(query, top_k=3)
         best_score = retrieved[0]["score"] if retrieved else 0.0
 
-        if not retrieved or best_score < MIN_RETRIEVAL_SCORE:
+        if (
+            not retrieved
+            or best_score < MIN_RETRIEVAL_SCORE
+            or not self._has_enough_evidence(query, retrieved[0])
+        ):
             return {
                 "answer": (
                     "I could not find this in the verified knowledge base, so I will not "

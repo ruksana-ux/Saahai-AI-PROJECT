@@ -64,7 +64,7 @@ interaction and captures still frames; it is a demo, not a client.
 ## Module boundaries
 
 All client code lives under
-`android/app/src/main/java/in/sahaayadrishti/app/`.
+`android/app/src/main/java/org/sahaayadrishti/app/`.
 
 | Package | Responsibility | Must not |
 |---|---|---|

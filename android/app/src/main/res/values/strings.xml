@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sahaaya Drishti</string>
+
+    <!-- Navigation -->
+    <string name="nav_money">Money</string>
+    <string name="nav_document">Read</string>
+    <string name="nav_schemes">Schemes</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Shared -->
+    <string name="btn_stop_speaking">Stop speaking</string>
+    <string name="btn_repeat">Repeat result</string>
+    <string name="preview_description">Live camera preview. Point the phone at the object.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="camera_permission_denied">Camera permission was denied. Open Settings and allow Camera to scan money or read a document.</string>
+
+    <!-- Currency -->
+    <string name="currency_prompt">Point the camera at one note or coin. Fill the frame and hold still.</string>
+    <string name="currency_result_placeholder">No result yet.</string>
+    <string name="btn_start_scan">Start scanning</string>
+    <string name="btn_stop_scan">Stop scanning</string>
+    <string name="currency_status_ready">Ready to scan.</string>
+    <string name="currency_status_loading">Loading the currency model.</string>
+    <string name="currency_status_scanning">Scanning. Hold still.</string>
+    <string name="currency_status_stopped">Scanning stopped.</string>
+    <string name="currency_model_loaded">Currency model loaded.</string>
+    <string name="currency_model_missing">No trained currency model is installed in this build. The app will not guess a denomination. You can still use the tactile guide in Settings.</string>
+    <string name="currency_spoken_identified">%1$s. %2$s. This is an identification aid, not a counterfeit check.</string>
+    <string name="currency_spoken_uncertain">Not sure. It could be %1$s or %2$s. Please hold still and scan again, or use the tactile check.</string>
+    <string name="currency_spoken_not_currency">This does not look like a supported Indian note or coin. Reframe and try again.</string>
+    <string name="currency_spoken_model_error">The scanner returned an invalid result. Please try again.</string>
+    <string name="currency_spoken_unavailable">The currency model is not installed in this build. The app will not guess a denomination.</string>
+    <string name="currency_confidence">Confidence %1$d percent.</string>
+    <string name="currency_tactile_label">Tactile check</string>
+    <string name="currency_disclaimer">Identification aid only. This app cannot verify whether a note is genuine.</string>
+    <string name="currency_guide_description">Guide frame. Place one note or coin inside it.</string>
+
+    <!-- Document -->
+    <string name="document_prompt">Fill the frame with one page, then press Capture page.</string>
+    <string name="document_result_placeholder">No page captured yet.</string>
+    <string name="btn_capture_page">Capture page</string>
+    <string name="btn_read_aloud">Read aloud</string>
+    <string name="btn_share_text">Share text</string>
+    <string name="document_status_ready">Ready to capture.</string>
+    <string name="document_status_reading">Reading the page. Please wait.</string>
+    <string name="document_status_no_text">No readable text was found. Move closer and fill the frame with the page.</string>
+    <string name="document_status_lines">%1$d lines recognised.</string>
+    <string name="document_quality_warning">The page may be blurry or poorly lit. The text below may contain errors.</string>
+    <string name="document_share_chooser">Share recognised text</string>
+    <string name="document_script_label">Document script</string>
+    <string name="script_latin">Latin (English and other Latin scripts)</string>
+    <string name="script_devanagari">Devanagari (Hindi, Marathi)</string>
+    <string name="document_scope_note">This build reads Latin and Devanagari text offline. Tamil, Telugu, Kannada, Malayalam, Bengali and Gujarati are not enabled yet.</string>
+    <string name="document_guide_description">Guide frame. Fill it with one page.</string>
+
+    <!-- Schemes -->
+    <string name="schemes_prompt">Ask about ADIP, UDID, the RPwD Act or Sugamya Bharat. Answers cite the official source and the date it was verified.</string>
+    <string name="schemes_query_hint">For example: ADIP income limit for a hearing aid</string>
+    <string name="btn_search">Search schemes</string>
+    <string name="btn_speak_answer">Read answer aloud</string>
+    <string name="scheme_preset_adip">ADIP documents</string>
+    <string name="scheme_preset_udid">UDID card</string>
+    <string name="scheme_preset_rpwd">RPwD reservation</string>
+    <string name="scheme_profile_toggle">Use my details for an eligibility check</string>
+    <string name="scheme_disability_percent">Disability percent</string>
+    <string name="scheme_income">Monthly family income in rupees</string>
+    <string name="scheme_has_udid">I have a UDID card</string>
+    <string name="scheme_has_aadhaar">I have Aadhaar</string>
+    <string name="scheme_not_found">I could not find this in the verified dataset, so I will not guess. Try a scheme name such as ADIP, UDID or RPwD, or check depwd.gov.in.</string>
+    <string name="scheme_dataset_error">The scheme dataset could not be loaded from this build, so no answer can be given.</string>
+    <string name="scheme_dataset_status">Dataset version %1$s. %2$d records. Verified %3$s.</string>
+    <string name="scheme_eligibility_eligible">Likely eligible</string>
+    <string name="scheme_eligibility_not_eligible">Not eligible on the facts supplied</string>
+    <string name="scheme_eligibility_unknown">Needs more information</string>
+    <string name="scheme_source">Source</string>
+    <string name="scheme_last_verified">Last verified</string>
+    <string name="scheme_review_due">Review due</string>
+    <string name="scheme_stale_warning">This record is past its review date. Confirm the current rules on the official portal before applying.</string>
+    <string name="scheme_disclaimer">This is an information aid, not a legal or financial decision. The official portal is the final authority.</string>
+    <string name="scheme_result_placeholder">No answer yet.</string>
+
+    <!-- Settings -->
+    <string name="settings_language">Speech language</string>
+    <string name="settings_speech_rate">Speech speed</string>
+    <string name="settings_haptics">Haptics</string>
+    <string name="settings_haptics_summary">Vibrate a pattern for each denomination and for errors.</string>
+    <string name="settings_telemetry">Anonymous quality reports</string>
+    <string name="settings_telemetry_summary">Off by default. This build sends nothing: there is no telemetry client yet. The switch is reserved for a future opt-in report containing only a predicted class and a timing bucket, never an image or document text.</string>
+    <string name="settings_telemetry_on">Quality reports on. Nothing is sent in this build.</string>
+    <string name="settings_telemetry_off">Quality reports off.</string>
+    <string name="settings_open_accessibility">Open Android accessibility settings</string>
+    <string name="settings_about_title">About this build</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_model_status">Currency model: %1$s</string>
+    <string name="model_present">installed</string>
+    <string name="model_absent">not installed</string>
+    <string name="settings_scope_note">Sahaaya Drishti identifies Indian notes and coins, reads printed pages aloud and answers disability-scheme questions with citations. It is not a mobility aid and it cannot detect counterfeit notes. It does not estimate distance in metres and it never says a path is clear.</string>
+    <string name="settings_tactile_title">Tactile guide</string>
+    <string name="settings_tactile_body">₹500 has 5 bleed lines. ₹200 has 4 bleed lines with 2 circles. ₹100 has 4 bleed lines. ₹50, ₹20 and ₹10 have no bleed lines; use the raised intaglio print and the note size. The ₹20 coin is 12-sided. Checked against RBI on 18 November 2026.</string>
+    <string name="settings_language_fallback">%1$s is not installed on this phone\'s speech engine. Using %2$s instead.</string>
+    <string name="settings_speech_rate_summary">%1$s times normal speed</string>
+    <string name="settings_data_title">Data</string>
+    <string name="settings_data_body">Camera frames are processed on this phone and are not saved. The scheme dataset ships inside the app and works offline. No account is required.</string>
+    <string name="settings_emergency_title">Emergency</string>
+    <string name="settings_emergency_body">This opens the phone dialler with 112 already typed. You still press the call button yourself. Sahaaya Drishti never sends your location.</string>
+    <string name="settings_emergency_call">Call 112</string>
+</resources>

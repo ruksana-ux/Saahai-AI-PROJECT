@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/schemes_prompt" />
+
+        <EditText
+            android:id="@+id/scheme_query"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:autofillHints=""
+            android:hint="@string/schemes_query_hint"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:minHeight="56dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_preset_adip"
+                style="@style/Widget.Sahaaya.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/scheme_preset_adip"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btn_preset_udid"
+                style="@style/Widget.Sahaaya.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/scheme_preset_udid"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btn_preset_rpwd"
+                style="@style/Widget.Sahaaya.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/scheme_preset_rpwd"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/check_use_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/scheme_profile_toggle" />
+
+        <LinearLayout
+            android:id="@+id/profile_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <EditText
+                android:id="@+id/profile_disability"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:hint="@string/scheme_disability_percent"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:minHeight="56dp" />
+
+            <EditText
+                android:id="@+id/profile_income"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:hint="@string/scheme_income"
+                android:importantForAutofill="no"
+                android:inputType="numberDecimal"
+                android:minHeight="56dp" />
+
+            <CheckBox
+                android:id="@+id/profile_has_udid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/scheme_has_udid" />
+
+            <CheckBox
+                android:id="@+id/profile_has_aadhaar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:minHeight="48dp"
+                android:text="@string/scheme_has_aadhaar" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_scheme_search"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_search" />
+
+        <TextView
+            android:id="@+id/scheme_result"
+            style="@style/TextAppearance.Sahaaya.Result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:accessibilityLiveRegion="polite"
+            android:background="@drawable/bg_result"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:minHeight="140dp"
+            android:padding="14dp"
+            android:text="@string/scheme_result_placeholder"
+            android:textIsSelectable="true" />
+
+        <Button
+            android:id="@+id/btn_scheme_speak"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_speak_answer" />
+
+        <Button
+            android:id="@+id/btn_scheme_stop"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_stop_speaking" />
+
+        <TextView
+            android:id="@+id/scheme_dataset_status"
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/muted"
+            android:textSize="14sp" />
+    </LinearLayout>
+</ScrollView>

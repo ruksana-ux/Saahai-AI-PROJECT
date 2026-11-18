@@ -1,0 +1,19 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests", "backend/tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# The Streamlit prototype configures page settings before importing engines.
+"app.py" = ["E402"]
+# ML scripts bootstrap sys.path so they can be run either as files or modules.
+# Import order across that boundary is manual on purpose.
+"ml/**/*.py" = ["E402", "I001"]

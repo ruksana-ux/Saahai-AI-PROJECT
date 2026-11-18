@@ -1,0 +1,72 @@
+name: Bug report
+description: Something is broken or a claim does not match the code.
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include personal documents, faces, note serial numbers, or API keys.
+        For a security issue, follow SECURITY.md instead of opening this form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include the exact spoken or visible output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. See ...
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where did it happen?
+      options:
+        - Android app
+        - Streamlit prototype
+        - Scheme dataset
+        - Backend
+        - ML training/evaluation
+        - Documentation
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: main@abc1234
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Redmi 9A, Android 10
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessibility impact
+      description: Does this block a TalkBack task? Which one?
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed personal data and secrets from this report.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

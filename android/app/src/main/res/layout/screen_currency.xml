@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/currency_status"
+        style="@style/TextAppearance.Sahaaya.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/currency_prompt" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/currency_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/preview_description" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="28dp"
+            android:background="@drawable/guide_box"
+            android:contentDescription="@string/currency_guide_description" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/currency_result"
+        style="@style/TextAppearance.Sahaaya.Result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:accessibilityLiveRegion="polite"
+        android:background="@drawable/bg_result"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:minHeight="84dp"
+        android:padding="14dp"
+        android:text="@string/currency_result_placeholder" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_currency_scan"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_start_scan" />
+
+        <Button
+            android:id="@+id/btn_currency_repeat"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_repeat" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_currency_stop"
+        style="@style/Widget.Sahaaya.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_stop_speaking" />
+</LinearLayout>

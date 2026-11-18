@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "model_task": "single-note-or-coin classification",
+  "input_size": [224, 224],
+  "normalisation": "raw_0_255",
+  "output": "logits",
+  "classes": [
+    {
+      "key": "unknown",
+      "label": "Not a supported note or coin",
+      "kind": "negative",
+      "notes": "Required. Must contain hands, tables, paper, other currencies and screens, not random noise."
+    },
+    {
+      "key": "10",
+      "label": "₹10 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 0,
+      "rbi_verified": true
+    },
+    {
+      "key": "20",
+      "label": "₹20 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 0,
+      "rbi_verified": true
+    },
+    {
+      "key": "50",
+      "label": "₹50 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 0,
+      "rbi_verified": true
+    },
+    {
+      "key": "100",
+      "label": "₹100 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 4,
+      "rbi_verified": true
+    },
+    {
+      "key": "200",
+      "label": "₹200 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 4,
+      "rbi_verified": true
+    },
+    {
+      "key": "500",
+      "label": "₹500 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 5,
+      "rbi_verified": true
+    },
+    {
+      "key": "2000",
+      "label": "₹2000 banknote",
+      "kind": "note",
+      "series": "Mahatma Gandhi (New) Series",
+      "bleed_lines": 7,
+      "rbi_verified": true,
+      "notes": "Withdrawn from circulation but still legal tender."
+    },
+    {
+      "key": "coin_1",
+      "label": "₹1 coin",
+      "kind": "coin",
+      "rbi_verified": false
+    },
+    {
+      "key": "coin_2",
+      "label": "₹2 coin",
+      "kind": "coin",
+      "rbi_verified": false
+    },
+    {
+      "key": "coin_5",
+      "label": "₹5 coin",
+      "kind": "coin",
+      "rbi_verified": false
+    },
+    {
+      "key": "coin_10",
+      "label": "₹10 coin (bimetallic)",
+      "kind": "coin",
+      "rbi_verified": false
+    },
+    {
+      "key": "coin_20",
+      "label": "₹20 coin (12-sided)",
+      "kind": "coin",
+      "rbi_verified": false
+    }
+  ],
+  "bleed_line_source": "https://indiancurrency.rbi.org.in/visual-impairment",
+  "bleed_line_checked": "2026-11-18"
+}

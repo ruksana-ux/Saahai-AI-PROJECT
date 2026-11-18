@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/ruksana-ux/Saahai-AI-PROJECT/security/policy
+    about: Report a vulnerability privately. Do not open a public issue.
+  - name: Product and safety rules
+    url: https://github.com/ruksana-ux/Saahai-AI-PROJECT/blob/main/docs/SAFETY.md
+    about: Read what the app does and does not do before filing.

@@ -1,86 +1,172 @@
-# Sahaaya AI (सहाय) — 100% Pure Python Assistive Platform for India
+# Sahaaya Drishti · सहाय दृष्टि
 
-An inclusive, multimodal, multilingual assistive technology platform written **100% in Python**, designed specifically for the socioeconomic, linguistic, and infrastructural realities of India.
+**An offline-first, on-device visual assistant for blind and low-vision users in India.**
 
-Empowers **visually impaired, deaf, hard-of-hearing, nonspeaking, and deafblind** children and adults to learn, communicate, navigate streets safely, access essential public services, and achieve daily independence.
+This repository is the refactor of the original *Sahaaya AI* prototype. The
+original Streamlit demo made claims the code did not support: "100% pure
+Python", "offline neural", "9 languages", "counterfeit detection", "path clear",
+"1.2 metres ahead", and a hard-coded Delhi SOS location. Those claims are being
+removed, not decorated.
 
----
-
-## 🇮🇳 Real-World Context & Technology Gaps in India
-
-According to official demographic assessments (Census of India, LASI, and NSS):
-- Approximately **2.21% of India's population (~26.8 million citizens)** lives with a disability.
-- **70% to 71%** of persons with disabilities in India lack access to necessary assistive hardware and software (WHO-UNICEF GReAT report).
-- **67.4%** of all assistive technology items in India are paid for **completely out-of-pocket** by low-income families.
-- Over **15.5%** of India's disability burden is concentrated in **Uttar Pradesh**, followed by **Maharashtra (11.05%)** and **Bihar (8.69%)**, where advanced medical aids are largely unaffordable.
-
-### How Sahaaya AI Fixes Existing Failures in India:
-| Existing Solution in India | Documented Shortcomings | Sahaaya AI (100% Python) Solution |
-| :--- | :--- | :--- |
-| **RBI MANI App** | **No counterfeit detection**, **zero support for coins**, fails on crumpled/older notes in dim light, voice search fails ("MANI" vs "Money"). | Identifies **banknotes (₹10–₹500)** AND **coins (₹5, ₹10, and 12-sided ₹20 dodecagon)**; provides **anti-counterfeit verification checklists** (tactile bleed lines, watermark, color-shifting thread); audio readouts. |
-| **Google Lookout / Seeing AI** | English-first, struggles with cluttered Indian streets, makes unverified AI claims. | **Localized across 9 Indian languages** with ground-plane edge analysis for Indian hazards (open storm drains/nalas, potholes, hanging wires). |
-| **Traditional White Canes / SmartCane** | High cost (₹3,000–₹15,000+), cannot detect low-hanging overhead wires or open storm drains. | Multi-modal **Street Hazard Vision** providing directional audio beacons, tactile vibration tiers, and emergency GPS SOS broadcast. |
-| **Western AAC Apps** | Prohibitive subscription fees ($100–$300), culturally alien icons, lack of Indian languages. | Pre-configured Indian everyday situations (**Clinic, Auto-rickshaw, Kirana/Ration shop, Panchayat**) with 180° tabletop flip card views. |
-| **Standalone ISL Dictionaries** | Video lists disconnected from school textbooks and classroom assessments. | **Accessible Classroom & ISL Studio** connecting worksheets, audio read-alouds, comprehension quizzes, and topic-linked sign vocabulary. |
+The production client is **Android native (Kotlin)**. The Streamlit app is kept
+as a browser demo of the models and the scheme dataset.
 
 ---
 
-## 🏗️ 100% Pure Python Architecture
+## Status (honest)
+
+| Area | State | Evidence |
+|---|---|---|
+| Legacy prototype bugs | Fixed; regression tests added (not yet executed here) | `tests/`, `docs/CLAIMS_MATRIX.md` |
+| Scheme dataset | 4 records, sourced and dated | `data/schemes/schemes.json` |
+| Scheme retrieval + rules | Working; regression tests added | `scheme_engine.py`, `tests/test_schemes.py` |
+| Document OCR (Python) | Working when an OCR engine is installed | `document_engine.py` |
+| Android client | Implemented; CI build defined but not yet run | `android/`, `.github/workflows/android-ci.yml` |
+| Currency model | **Not trained yet** | `ml/currency/` pipeline + model card |
+| On-device latency | **Not measured yet** | `benchmarks/` |
+| User pilot | **Not run yet** | `docs/ROADMAP.md` |
+
+The app deliberately says "no model installed" instead of inventing a
+denomination. Do not ship it as a currency aid until the model card has real
+numbers.
+
+---
+
+## What v1 does
+
+1. **Identify Indian notes and coins** — ₹10 to ₹2000 notes and ₹1 to ₹20 coins,
+   including the 12-sided ₹20 coin, with an explicit *unknown* class.
+2. **Read printed documents aloud** — offline OCR, line-ordered text, and speech.
+3. **Answer disability-scheme questions with citations** — ADIP, UDID, RPwD and
+   Sugamya Bharat, with a rules-based eligibility check and a last-verified date.
+4. **Open the dialler on 112** — from Settings, with 112 pre-filled. The app
+   never places the call itself and never sends a location.
+
+Everything above is designed to work in airplane mode on a low-end Android
+phone. The Android client does not call the backend in this release; `backend/`
+is a read-only dataset service for a future, user-initiated update path.
+
+---
+
+## What v1 does not do
+
+- street navigation, pothole detection, or "path clear" announcements
+- counterfeit detection
+- distance estimates in metres
+- deafblind communication, ISL education, or AAC (kept as out-of-scope prototypes)
+- "all disabilities in one app"
+- nine languages everywhere
+- real-time video on the web client
+
+See `docs/SAFETY.md` for why these are excluded.
+
+---
+
+## Repository layout
 
 ```
-saahai-ai-project/
-│
-├── app.py                   # Streamlit Main Application (7 Interactive Modules)
-├── rag_engine.py            # Hybrid TF-IDF Vector Search & LLM Generation (Gemini / OpenAI / Offline)
-├── cv_engine.py             # Computer Vision: Street hazards, potholes, open nalas, low wires
-├── currency_engine.py       # Banknote & Coin CV Classifier + Anti-Counterfeit Checklist
-├── classroom_engine.py      # NCERT Worksheet Reader, Summarizer & Comprehension Quiz
-├── isl_engine.py            # Indian Sign Language (ISL) Education & Quiz Engine
-├── aac_engine.py            # Multilingual AAC Engine with 180° Tabletop Flip Cards
-│
-├── knowledge_base/          # Verified Indian Datasets
-│   ├── demographics_data.json   # Census, LASI, State Burden (UP, Bihar, Maharashtra)
-│   ├── welfare_schemes.json     # ADIP eligibility (<₹15k/mo), UDID, RPwD Act 2016
-│   └── tech_gap_analysis.json   # RBI MANI, Kibo, SmartCane gap comparisons
-│
-├── .streamlit/config.toml   # Accessible High-Contrast Theme
-├── requirements.txt         # Pure Python Dependencies (Streamlit, gTTS, Pillow, OpenCV, NumPy)
-└── .gitignore               # Git Rules
+android/                 Kotlin client: CameraX, TFLite, ML Kit, TalkBack, haptics
+ml/
+  currency/              training, calibration, TFLite export, evaluation
+  rag/                   retrieval evaluation harness
+backend/                 FastAPI read-only dataset service
+data/
+  schemes/               versioned, citation-backed scheme dataset + JSON Schema
+  currency/              class list and dataset collection protocol
+benchmarks/              measured results only; empty until measured
+docs/                    architecture, safety, claims matrix, model/dataset cards
+tests/                   regression tests for the prototype and the new engines
+legacy modules           app.py, rag_engine.py, currency_engine.py, ...
+.github/workflows/       lint, tests, model eval, Android build, CodeQL
+.devcontainer/           Codespaces environment with Python, Java and Android SDK
 ```
 
 ---
 
-## 🚀 Live Cloud Deployment via GitHub & Streamlit Community Cloud
+## Quick start: prototype (browser)
 
-### Step 1: Push Changes to GitHub
-```powershell
-git add .
-git commit -m "refactor: convert entire platform to 100% pure Python architecture"
-git push origin main
-```
-
-### Step 2: Deploy to Streamlit Community Cloud (Free 24/7)
-1. Go to [share.streamlit.io](https://share.streamlit.io/) and click **Continue with GitHub**.
-2. Click **Create app** (or **New app**).
-3. Select:
-   - **Repository**: `ruksana-ux/Saahai-AI-PROJECT`
-   - **Branch**: `main`
-   - **Main file path**: `app.py`
-4. *(Optional)* Add your Gemini API key in **Advanced settings** -> **Secrets**:
-   ```toml
-   GEMINI_API_KEY = "your-google-gemini-key"
-   ```
-   *(Note: The app works out of the box even without any API key using its built-in offline neural semantic RAG engine).*
-5. Click **Deploy!** 🚀
-
----
-
-## 🛠️ Local Development & Testing
-
-```powershell
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Run Streamlit application
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+pytest
 streamlit run app.py
 ```
+
+The prototype works without any API key. If no OCR engine is installed it says
+so; if no currency model is installed it says so.
+
+Optional environment variables:
+
+```bash
+SAHAAYA_LLM_MODEL=gemini-2.0-flash
+GEMINI_API_KEY=...
+OPENAI_API_KEY=...
+SAHAAYA_CURRENCY_MODEL=models/currency/currency_model.tflite
+```
+
+---
+
+## Quick start: Android
+
+Requirements: JDK 17, Android SDK 35, Gradle 8.9.
+
+```bash
+cd android
+gradle :app:assembleDebug
+```
+
+Or open `android/` in Android Studio. In GitHub Codespaces the devcontainer
+installs the SDK; run `scripts/setup-android-sdk.sh` once if it is missing.
+
+The app needs `app/src/main/assets/currency/currency_model.tflite` to identify
+currency. Without it, the currency screen states that the model is not installed.
+
+---
+
+## Train the currency model
+
+```bash
+pip install -r ml/requirements.txt
+python ml/currency/train.py --data data/currency/dataset --epochs 20
+python ml/currency/evaluate.py --model artifacts/currency/model.keras --data data/currency/dataset
+python ml/currency/export_tflite.py --model artifacts/currency/model.keras
+cp models/currency/currency_model.tflite android/app/src/main/assets/currency/
+cp models/currency/currency_model.json   android/app/src/main/assets/currency/
+```
+
+Read `docs/DATASET_CARD.currency.md` before collecting images. The split must be
+by background and device, not by random frame, or the reported accuracy is fake.
+`evaluate.py` writes the exact keys `ml-eval.yml` enforces. Nothing is trained or
+measured in this repository yet; `benchmarks/results/` is empty on purpose.
+
+---
+
+## GitHub workflow
+
+- `python-ci.yml` — ruff, pytest, JSON schema validation
+- `android-ci.yml` — Gradle build and Android lint
+- `ml-eval.yml` — runs only when a model artifact exists; fails if metrics are missing
+- `codeql.yml` — static analysis
+- Issue templates require a reproduction and an accessibility impact statement
+- `docs/CLAIMS_MATRIX.md` must be updated in the same PR as any user-facing claim
+
+---
+
+## Safety and privacy
+
+- On-device by default. No image leaves the phone.
+- No network permission is requested in this release.
+- No account required for core features.
+- No retention of camera frames.
+- Emergency: the app opens the dialler on 112. It does not silently broadcast location.
+- Currency: identification aid only, never authentication.
+- Schemes: source URL and last-verified date on every answer.
+
+Read `docs/SAFETY.md` and `docs/PRIVACY.md`.
+
+---
+
+## License
+
+MIT. See `LICENSE`.

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sahaaya-drishti.in/schemas/schemes.json",
+  "title": "Sahaaya Drishti scheme dataset",
+  "type": "object",
+  "required": ["schema_version", "dataset_version", "last_verified", "schemes"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "dataset_version": { "type": "string" },
+    "last_verified": { "type": "string", "format": "date" },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "schemes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "aliases",
+          "category",
+          "jurisdiction",
+          "summary",
+          "eligibility",
+          "benefits",
+          "documents_required",
+          "how_to_apply",
+          "portal_url",
+          "source_url",
+          "last_verified",
+          "review_due",
+          "verification_status",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 3 },
+          "aliases": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "category": {
+            "enum": ["assistive-devices", "identity", "rights", "accessibility", "education", "health", "pension"]
+          },
+          "jurisdiction": { "type": "string" },
+          "summary": { "type": "string", "minLength": 20 },
+          "eligibility": {
+            "type": "object",
+            "required": ["disability_percent_min", "requires_udid", "requires_aadhaar", "income_slabs", "notes"],
+            "additionalProperties": false,
+            "properties": {
+              "disability_percent_min": { "type": "number", "minimum": 0, "maximum": 100 },
+              "requires_udid": { "type": "boolean" },
+              "requires_aadhaar": { "type": "boolean" },
+              "income_slabs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["subsidy_percent"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "min_monthly_inr": { "type": "number", "minimum": 0 },
+                    "max_monthly_inr": { "type": "number", "minimum": 0 },
+                    "subsidy_percent": { "type": "number", "minimum": 0, "maximum": 100 }
+                  }
+                }
+              },
+              "notes": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "benefits": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "documents_required": { "type": "array", "items": { "type": "string" } },
+          "how_to_apply": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "portal_url": { "type": "string", "format": "uri" },
+          "helpline": { "type": "string" },
+          "source_url": { "type": "string", "format": "uri" },
+          "last_verified": { "type": "string", "format": "date" },
+          "review_due": { "type": "string", "format": "date" },
+          "verification_status": {
+            "enum": ["official-source-checked", "official-portal-checked", "needs-review", "deprecated"]
+          },
+          "notes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

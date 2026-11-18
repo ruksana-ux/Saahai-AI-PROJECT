@@ -1,487 +1,559 @@
 """
-Sahaaya AI (सहाय) — Accessibility Without Barriers
-100% Pure Python Assistive Platform for India.
-Integrated with LLM & RAG Copilot, Computer Vision, Currency Classifier,
-ISL Education Studio, Indian AAC Board, and Classroom Assessment Engine.
+Sahaaya AI - legacy Streamlit prototype.
+
+STATUS: prototype / archive. This is **not** the production client.
+
+The production product is the Android app in ``android/``. Streamlit reruns the
+whole script on every interaction, captures still frames, and cannot deliver a
+sub-200 ms camera-to-haptic loop, so it is kept only as a browser demo of the
+models and the scheme dataset.
+
+Every screen below is written to avoid the overclaims in the previous version.
+See docs/CLAIMS_MATRIX.md for the claim-by-claim status.
 """
+
+from __future__ import annotations
+
+import os
 
 import streamlit as st
 from PIL import Image
 
-# 100% Pure Python Engine Imports
-from rag_engine import SahaayaRAGEngine
-from cv_engine import SahaayaVisionEngine
-from currency_engine import SahaayaCurrencyEngine
-from isl_engine import SahaayaISLEngine
 from aac_engine import SahaayaAACEngine
 from classroom_engine import SahaayaClassroomEngine
+from currency_engine import SahaayaCurrencyEngine
+from document_engine import read_document
+from isl_engine import SahaayaISLEngine
+from rag_engine import TTS_LANGUAGES, SahaayaRAGEngine
+from scheme_engine import Profile, SchemeEngine
 
-# Streamlit Page Configuration
 st.set_page_config(
-    page_title="Sahaaya AI (सहाय) — 100% Python Assistive Platform",
+    page_title="Sahaaya Drishti - prototype",
     page_icon="🇮🇳",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-# Initialize Python Engines in Streamlit Cache
+
+def secret(name: str) -> str:
+    """Read a secret without crashing when secrets.toml is absent.
+
+    ``st.secrets.get`` raises ``StreamlitSecretNotFoundError`` (a
+    ``FileNotFoundError``) when no secrets file exists, so ``hasattr`` and
+    ``.get`` are both insufficient. Environment variables are the fallback.
+    """
+    try:
+        value = st.secrets.get(name, "")
+    except Exception:  # noqa: BLE001 - missing/invalid secrets file
+        value = ""
+    return str(value or os.getenv(name, ""))
+
+
 @st.cache_resource
-def load_all_engines():
+def load_engines():
     return {
         "rag": SahaayaRAGEngine(kb_dir="knowledge_base"),
-        "vision": SahaayaVisionEngine(),
+        "schemes": SchemeEngine(),
         "currency": SahaayaCurrencyEngine(),
+        "classroom": SahaayaClassroomEngine(),
         "isl": SahaayaISLEngine(),
         "aac": SahaayaAACEngine(),
-        "classroom": SahaayaClassroomEngine()
     }
 
-engines = load_all_engines()
+
+engines = load_engines()
 rag = engines["rag"]
-vision = engines["vision"]
+schemes = engines["schemes"]
 currency = engines["currency"]
+classroom = engines["classroom"]
 isl = engines["isl"]
 aac = engines["aac"]
-classroom = engines["classroom"]
 
-# --- ACCESSIBILITY CUSTOM CSS ---
-st.markdown("""
-<style>
-    .stApp {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-    }
-    .brand-header {
-        background: linear-gradient(135deg, #00796B 0%, #004D40 100%);
-        color: white;
-        padding: 22px 26px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-    }
-    .brand-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .brand-badge {
-        background: #FFB300;
-        color: #000;
-        padding: 4px 14px;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 900;
-    }
-    .citation-box {
-        background: #F1F5F9;
-        border-left: 4px solid #00796B;
-        padding: 12px 16px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        margin-top: 12px;
-    }
-    .flip-card-view {
-        background: #FEF3C7;
-        border: 3px solid #D97706;
-        padding: 24px;
-        border-radius: 12px;
-        text-align: center;
-        transform: rotate(180deg);
-        margin: 16px 0;
-    }
-    .hazard-box-danger {
-        background: #FEE2E2;
-        border: 2px solid #DC2626;
-        padding: 14px;
-        border-radius: 8px;
-        color: #991B1B;
-    }
-    .hazard-box-safe {
-        background: #DCFCE7;
-        border: 2px solid #16A34A;
-        padding: 14px;
-        border-radius: 8px;
-        color: #166534;
-    }
-</style>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <style>
+      .sd-banner { background:#0b3d3a; color:#fff; padding:18px 22px; border-radius:12px; }
+      .sd-banner h1 { margin:0; font-size:1.7rem; }
+      .sd-banner p { margin:6px 0 0; opacity:.9; }
+      .sd-note { background:#fff8e1; border-left:5px solid #b26a00; padding:10px 14px; border-radius:6px; }
+      .sd-cite { background:#eef4f3; border-left:5px solid #00796b; padding:10px 14px; border-radius:6px; font-size:.9rem; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# --- SIDEBAR CONFIGURATION ---
-with st.sidebar:
-    st.image("https://images.openai.com/static-rsc-4/hLQKrAZLCbvXvuBaUe6o1lNEGmiO0_cviiQoTMN_aZsbxoJYmpePg7NQA0qYqw1AOW88E5l_C3U0XzLR2ATiMlFBUkxWic56hpf3PZIq5amdva7zOG8aWuJpH9Q0N_bGhZlaBJOqPsJqrXxj9LAkpLxnF4WCdieLkkefM1i4lXUt4YVa8gn0t403oaxNQHK5?purpose=inline", use_container_width=True)
-    st.title("⚙️ Assistive Controls")
-
-    target_lang = st.selectbox(
-        "🌐 Voice & Interface Language",
-        ["Hindi", "English", "Tamil", "Telugu", "Kannada", "Bengali", "Malayalam", "Marathi", "Gujarati"],
-        index=0
-    )
-
-    disability_profile = st.radio(
-        "👤 Adaptive Disability Profile",
-        ["🌟 All Tools Mode", "👁️ Visually Impaired", "🧏 Deaf & Hard-of-Hearing", "🗣️ Nonspeaking / AAC", "🦯 Deafblind Mode"],
-        index=0
-    )
-
-    st.markdown("---")
-    st.subheader("🤖 LLM & RAG Configuration")
-
-    gemini_key = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, "secrets") else ""
-    openai_key = st.secrets.get("OPENAI_API_KEY", "") if hasattr(st, "secrets") else ""
-
-    user_gemini_key = st.text_input("Google Gemini API Key (Optional)", value=gemini_key, type="password")
-    user_openai_key = st.text_input("OpenAI API Key (Optional)", value=openai_key, type="password")
-
-    if user_gemini_key:
-        st.success("⚡ Gemini 1.5 Flash Active")
-    elif user_openai_key:
-        st.success("⚡ OpenAI GPT-4o-mini Active")
-    else:
-        st.info("ℹ️ Built-in Offline Neural RAG Active (No Key Required)")
-
-    st.markdown("---")
-    st.subheader("🇮🇳 Key National Statistics")
-    st.markdown("""
-    - **Total Population**: ~1.48 Billion (Rank 1)
-    - **Disability Rate**: **2.21%** (~2.68 Cr citizens)
-    - **Unmet Tech Need**: **70%** (WHO-UNICEF)
-    - **Out-of-Pocket Cost**: **67.4%**
-    - **Highest Burden State**: **Uttar Pradesh (15.5%)**
-    - **National Helpline**: **1800-180-5129 (ALIMCO)**
-    """)
-
-# --- MAIN BRAND HEADER ---
-st.markdown("""
-<div class="brand-header">
-    <div class="brand-title">
-        <span>Sahaaya AI</span>
-        <span class="brand-badge">सहाय</span>
+st.markdown(
+    """
+    <div class="sd-banner">
+      <h1>Sahaaya Drishti <span aria-hidden="true">·</span> सहाय दृष्टि</h1>
+      <p>Browser prototype for Indian currency, documents and disability schemes.
+      The production app is the offline-first Android client in <code>android/</code>.</p>
     </div>
-    <p style="margin: 6px 0 0 0; opacity: 0.94; font-size: 1.05rem;">
-        Accessibility Without Barriers • 100% Pure Python Assistive Technology Platform for India
-    </p>
-</div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown(
+    '<div class="sd-note"><b>Prototype notice.</b> This page is a demo, not a '
+    "mobility aid, not a counterfeit detector, and not a substitute for the "
+    "official scheme portal. Do not rely on it for safety decisions.</div>",
+    unsafe_allow_html=True,
+)
 
-# Main Navigation Tabs
-tabs = st.tabs([
-    "🧠 LLM & RAG Copilot",
-    "💵 Currency & Coin AI",
-    "🏫 Classroom & OCR",
-    "🚸 Street Hazard Vision",
-    "🤟 ISL Education Studio",
-    "🗣️ Indian AAC Board",
-    "📊 Demographics & Schemes"
-])
+# ---------------------------------------------------------------------------
+# Sidebar
+# ---------------------------------------------------------------------------
+with st.sidebar:
+    st.title("Controls")
+    language = st.selectbox(
+        "Voice language",
+        list(TTS_LANGUAGES.keys()),
+        index=0,
+        help="Speech output only. The AAC board supports English, Hindi, Tamil, Telugu and Kannada.",
+    )
 
-# ==============================================================================
-# TAB 1: LLM & RAG ASSISTIVE COPILOT
-# ==============================================================================
-with tabs[0]:
-    st.subheader("🧠 Sahaaya LLM & RAG Assistive Copilot")
+    st.markdown("---")
+    st.subheader("Optional language model")
+    gemini_key = secret("GEMINI_API_KEY")
+    openai_key = secret("OPENAI_API_KEY")
+    gemini_input = st.text_input(
+        "Google Gen AI API key (optional)", value=gemini_key, type="password"
+    )
+    openai_input = st.text_input(
+        "OpenAI API key (optional)", value=openai_key, type="password"
+    )
+    if gemini_input or openai_input:
+        st.success("A language model is configured. Scheme eligibility is still rule-based.")
+    else:
+        st.info("No LLM configured. Answers are extracts from the verified dataset.")
+
+    st.markdown("---")
+    st.subheader("What this build can do")
     st.markdown(
-        "Ask questions about **government welfare schemes (ADIP, UDID, RPwD Act 2016)**, "
-        "medical accommodations, or technology gap fixes. Grounded in verified Indian data."
+        "- Currency: real TFLite model if one is installed, otherwise it says so.\n"
+        "- Documents: offline OCR if RapidOCR or Tesseract is installed.\n"
+        "- Schemes: BM25 retrieval plus a rules engine, with citations.\n"
+        "- Emergency: dials 112. No automatic location is sent."
     )
 
-    col_p1, col_p2 = st.columns(2)
-    with col_p1:
-        if st.button("📋 How do I get free hearing aids / smart canes under ADIP Scheme?"):
-            st.session_state["query_input"] = "How do I apply for free hearing aids or smart canes under the ADIP Scheme?"
-        if st.button("⚖️ What are the key rights under RPwD Act 2016 for education and jobs?"):
-            st.session_state["query_input"] = "What are the legal reservations and rights under the Rights of Persons with Disabilities Act 2016?"
-    with col_p2:
-        if st.button("🔍 Why does RBI MANI app fail on Indian street currency?"):
-            st.session_state["query_input"] = "What are the critical drawbacks of RBI MANI app and how does Sahaaya AI solve them?"
-        if st.button("🛡️ How to verify counterfeit ₹500 notes using tactile marks?"):
-            st.session_state["query_input"] = "How can a visually impaired person detect counterfeit ₹500 notes using tactile marks?"
-
-    query = st.text_input(
-        "Ask a question in your preferred language:",
-        value=st.session_state.get("query_input", ""),
-        placeholder="e.g. How to get travel concessions using UDID card?"
+    st.markdown("---")
+    st.caption(
+        "Legacy demo kept for reference. Production target: Android 8+, 2 GB RAM, "
+        "airplane mode."
     )
 
-    if st.button("🚀 Ask Sahaaya AI", type="primary") and query:
-        with st.spinner("Retrieving verified Indian knowledge and synthesizing response..."):
-            rag_res = rag.generate_answer(
-                query=query,
-                lang=target_lang,
-                gemini_api_key=user_gemini_key or gemini_key,
-                openai_api_key=user_openai_key or openai_key
-            )
+# ---------------------------------------------------------------------------
+# Tabs
+# ---------------------------------------------------------------------------
+currency_tab, document_tab, scheme_tab, archive_tab, safety_tab = st.tabs(
+    [
+        "💵 Currency",
+        "📄 Documents",
+        "🏛️ Schemes",
+        "🗂️ Out-of-scope archive",
+        "🛡️ Safety & status",
+    ]
+)
 
-            st.markdown(rag_res["answer"])
-
-            st.markdown(f"""
-            <div class="citation-box">
-                <b>📚 Grounded Sources Cited:</b> {', '.join(rag_res['sources'])}<br>
-                <b>🤖 Synthesis Engine:</b> {rag_res['engine']}
-            </div>
-            """, unsafe_allow_html=True)
-
-            audio_fp = rag.text_to_speech_audio(rag_res["answer"], target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
-
-# ==============================================================================
-# TAB 2: RUPEE CURRENCY & COIN AI IDENTIFIER
-# ==============================================================================
-with tabs[1]:
-    st.subheader("💵 Indian Rupee Banknote & Coin AI Identifier (Pure Python)")
-    st.markdown(
-        "Solves the RBI MANI app shortcomings by identifying **banknotes AND coins** "
-        "(including the 12-sided ₹20 dodecagon coin) with anti-counterfeit verification checklists."
+# ===========================================================================
+# Currency
+# ===========================================================================
+with currency_tab:
+    st.subheader("Indian banknotes and coins")
+    st.write(
+        "Identify a denomination. This is an **identification aid**, not an "
+        "authentication device: it cannot tell you whether a note is genuine."
     )
 
-    curr_col1, curr_col2 = st.columns([1, 1])
-
-    with curr_col1:
-        cam_image = st.camera_input("📸 Point camera at Indian Banknote or Coin")
-        uploaded_image = st.file_uploader("Or upload currency photo", type=["jpg", "jpeg", "png"])
-        target_img = cam_image or uploaded_image
-
-    with curr_col2:
-        if target_img:
-            img = Image.open(target_img)
-            st.image(img, caption="Viewfinder Image", use_container_width=True)
-
-            res = currency.classify_image(img)
-
-            st.success(f"### Detected: {res['denomination']} ({res['confidence']}% confidence)")
-            st.info(f"**Series & Theme**: {res['series']} • {res['color']} • {res['motif']}")
-            st.warning(f"**📳 Tactile Haptic Vibration Pattern**: {res['haptic_pattern']}")
-            st.write(f"**🔍 Key Tactile Mark**: {res['tactile_mark']}")
-
-            st.markdown("#### 🛡️ Anti-Counterfeit Verification Checklist:")
-            for check in res["security_checklist"]:
-                st.markdown(f"- ✅ {check}")
-
-            audio_fp = rag.text_to_speech_audio(f"Identified {res['denomination']}. {res['color']}. Verify tactile bleed lines.", target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
-
-        else:
-            st.info("💡 Position currency in camera view above, or select a test denomination below:")
-            pick_curr = st.selectbox(
-                "Manual Denomination Inspector:",
-                ["500", "200", "100", "50", "20", "10"],
-                format_func=lambda x: currency.CURRENCY_SPECS[x]["name"]
-            )
-            spec = currency.CURRENCY_SPECS[pick_curr]
-            st.write(f"**Denomination**: {spec['name']}")
-            st.write(f"**Series**: {spec['series']} • {spec['color']} • {spec['motif']}")
-            st.write(f"**Tactile Mark**: {spec['tactile_mark']}")
-            for check in spec["security_checklist"]:
-                st.write(f"- ✅ {check}")
-
-# ==============================================================================
-# TAB 3: ACCESSIBLE CLASSROOM & OCR
-# ==============================================================================
-with tabs[2]:
-    st.subheader("🏫 Accessible Indian Classroom & OCR Engine (Pure Python)")
-    st.markdown(
-        "Scan worksheets, textbook paragraphs, or school circulars. "
-        "Listen to spoken read-alouds, simplified summaries, and test comprehension with auto-generated quizzes."
-    )
-
-    cls_col1, cls_col2 = st.columns([1, 1])
-
-    with cls_col1:
-        selected_title = st.selectbox("📑 Select Preloaded Indian Lesson:", classroom.get_lesson_titles())
-        lesson_data = classroom.get_lesson(selected_title)
-
-        worksheet_text = st.text_area(
-            "Worksheet Text Content:",
-            value=lesson_data["text"],
-            height=160
+    if currency.model_available:
+        st.success(f"Currency model loaded: `{currency.model_path}`")
+    else:
+        st.warning(
+            "**No trained currency model is installed in this build.** "
+            "The app will not guess a denomination. Run `ml/currency/train.py` "
+            "and copy the exported model to `models/currency/`."
         )
 
-        st.markdown(f"**💡 Simplified Student Summary**: {lesson_data['simplified']}")
-        st.write(f"**🤟 Related ISL Concepts**: {', '.join(lesson_data['related_isl_signs'])}")
+    left, right = st.columns([1, 1])
+    with left:
+        camera_image = st.camera_input("Photograph a note or coin")
+        uploaded = st.file_uploader(
+            "Or upload a photo", type=["jpg", "jpeg", "png"], key="currency_upload"
+        )
+        source = camera_image or uploaded
 
-    with cls_col2:
-        speed = st.slider("🔊 Readout Speed", 0.5, 1.5, 1.0, 0.1)
-        if st.button("🔊 Read Worksheet Aloud"):
-            audio_fp = rag.text_to_speech_audio(worksheet_text, target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
+    with right:
+        if source:
+            image = Image.open(source)
+            st.image(image, caption="Input frame", use_container_width=True)
+            result = currency.classify_image(image)
+
+            status = result["status"]
+            if status == "model_unavailable":
+                st.error(result["message"])
+            elif status == "model_error":
+                # No confidence exists for this frame, so it must not fall
+                # through to the success branch below.
+                st.error(result["message"])
+            elif status == "unknown":
+                st.warning(
+                    "This does not look like a supported Indian note or coin. "
+                    "Reframe and try again."
+                )
+            elif status == "uncertain":
+                top2 = ", ".join(
+                    f"{item['label']} ({item['probability'] * 100:.0f}%)"
+                    for item in result["top2"]
+                )
+                st.warning(
+                    "**Not confident enough to state a denomination.** "
+                    f"Best guesses: {top2}. Please rescan in better light, or use "
+                    "the tactile check below."
+                )
+            else:
+                st.success(f"**{result['denomination']}**")
+                st.caption(
+                    f"Model confidence: {result['confidence'] * 100:.1f}% "
+                    f"(top-2 margin {result['margin'] * 100:.1f}%)"
+                )
+
+            spec = result.get("spec")
+            if spec:
+                st.markdown(f"**Tactile check:** {spec['tactile_mark']}")
+                if spec["kind"] == "note":
+                    st.caption(
+                        f"RBI series: {spec['series']} · colour: {spec['colour']} · "
+                        f"motif: {spec['motif']}"
+                    )
+            st.info(result["disclaimer"])
+
+            if st.button("🔊 Speak result", key="speak_currency"):
+                spoken = result["denomination"] or result["message"]
+                audio = rag.text_to_speech_audio(spoken, language)
+                if audio:
+                    st.audio(audio, format="audio/mp3")
+                else:
+                    st.warning("Speech is unavailable (gTTS is not installed).")
+        else:
+            st.info("Add a photo, or open the manual tactile guide below.")
+
+    with st.expander("Manual tactile guide (works without a model)"):
+        key = st.selectbox(
+            "Denomination",
+            list(currency.CURRENCY_SPECS.keys()),
+            format_func=lambda item: currency.CURRENCY_SPECS[item]["name"],
+        )
+        spec = currency.CURRENCY_SPECS[key]
+        st.write(f"**{spec['name']}** — {spec['series']}")
+        st.write(spec["tactile_mark"])
+        if spec["kind"] == "note" and spec["bleed_lines"]:
+            st.write(f"Bleed lines: **{spec['bleed_lines']}**")
+        st.caption(
+            "Tactile marks checked against RBI's 'For Visually Impaired' page on "
+            "2026-11-18. Coins are described by shape and relative size only."
+        )
+
+# ===========================================================================
+# Documents
+# ===========================================================================
+with document_tab:
+    st.subheader("Read a printed document aloud")
+    st.write(
+        "Offline OCR with layout-aware reading order. For Hindi, Tamil, Telugu, "
+        "Kannada, Malayalam, Bengali, Marathi and Gujarati, install the matching "
+        "Tesseract language pack; RapidOCR's bundled model is Latin-script first."
+    )
+
+    doc_left, doc_right = st.columns([1, 1])
+    with doc_left:
+        doc_camera = st.camera_input("Photograph a page", key="doc_camera")
+        doc_upload = st.file_uploader(
+            "Or upload a page", type=["jpg", "jpeg", "png"], key="doc_upload"
+        )
+        doc_source = doc_camera or doc_upload
+        tesseract_lang = st.selectbox(
+            "OCR language",
+            ["eng", "hin", "tam", "tel", "kan", "mal", "ben", "mar", "guj"],
+            index=0,
+            help="Used when Tesseract is the active engine.",
+        )
+
+    with doc_right:
+        if doc_source:
+            page = Image.open(doc_source)
+            st.image(page, caption="Page", use_container_width=True)
+            result = read_document(page, lang=tesseract_lang)
+
+            if result["status"] == "engine_unavailable":
+                st.error(result["warning"])
+            else:
+                quality = result["quality"]
+                st.caption(
+                    f"Engine: {result['engine']} · blur score {quality['blur_score']} · "
+                    f"glare {quality['glare_ratio'] * 100:.1f}%"
+                )
+                if result["warning"]:
+                    st.warning(result["warning"])
+
+                text = st.text_area(
+                    "Recognised text (editable)", value=result["text"], height=260
+                )
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    if st.button("🔊 Read aloud", key="speak_document"):
+                        audio = rag.text_to_speech_audio(text, language)
+                        if audio:
+                            st.audio(audio, format="audio/mp3")
+                        else:
+                            st.warning("Speech is unavailable (gTTS is not installed).")
+                with col_b:
+                    st.download_button(
+                        "Download text",
+                        data=text.encode("utf-8"),
+                        file_name="sahaaya-document.txt",
+                        mime="text/plain",
+                    )
+                st.caption(
+                    "Verify legal, medical and financial details with the issuing office."
+                )
+        else:
+            st.info("Add a page photo to run OCR.")
+
+# ===========================================================================
+# Schemes
+# ===========================================================================
+with scheme_tab:
+    st.subheader("Disability schemes with citations")
+    st.write(
+        "Answers come from a versioned dataset. Eligibility is computed by rules, "
+        "not generated by a language model. Every answer shows its source and the "
+        "date it was last verified."
+    )
+
+    presets = [
+        "What documents do I need for ADIP?",
+        "What is the income limit for a free hearing aid under ADIP?",
+        "How do I get a UDID card?",
+        "What reservation does the RPwD Act give in jobs and education?",
+    ]
+    preset_cols = st.columns(len(presets))
+    for index, preset in enumerate(presets):
+        with preset_cols[index]:
+            if st.button(preset, key=f"preset_{index}"):
+                st.session_state["scheme_query"] = preset
+
+    query = st.text_input(
+        "Ask about a scheme",
+        key="scheme_query",
+        placeholder="e.g. ADIP income limit for a smart cane",
+    )
+
+    with st.expander("Check my eligibility (optional)"):
+        profile_cols = st.columns(4)
+        with profile_cols[0]:
+            disability_percent = st.number_input(
+                "Disability %", min_value=0, max_value=100, value=40, step=1
+            )
+        with profile_cols[1]:
+            monthly_income = st.number_input(
+                "Monthly family income (₹)", min_value=0, value=20000, step=500
+            )
+        with profile_cols[2]:
+            has_udid = st.checkbox("I have a UDID card", value=False)
+        with profile_cols[3]:
+            has_aadhaar = st.checkbox("I have Aadhaar", value=True)
+        use_profile = st.checkbox("Use these details in the eligibility check", value=False)
+
+    if st.button("Search schemes", type="primary") and query:
+        profile = (
+            Profile(
+                disability_percent=float(disability_percent),
+                monthly_income_inr=float(monthly_income),
+                has_udid=has_udid,
+                has_aadhaar=has_aadhaar,
+            )
+            if use_profile
+            else None
+        )
+        result = schemes.answer(query, profile=profile)
+        st.markdown(result["answer"])
+
+        if result["citations"]:
+            citations = "<br>".join(
+                f'<b>{item["name"]}</b> — <a href="{item["source_url"]}">{item["source_url"]}</a>'
+                f' (verified {item["last_verified"]})'
+                for item in result["citations"]
+            )
+            st.markdown(f'<div class="sd-cite">{citations}</div>', unsafe_allow_html=True)
+
+        if st.button("🔊 Read answer aloud", key="speak_scheme"):
+            audio = rag.text_to_speech_audio(result["answer"], language)
+            if audio:
+                st.audio(audio, format="audio/mp3")
+            else:
+                st.warning("Speech is unavailable (gTTS is not installed).")
+
+    st.caption(
+        f"Dataset version {schemes.dataset.get('dataset_version', 'unknown')} · "
+        f"records {len(schemes.schemes)} · dataset verified "
+        f"{schemes.dataset.get('last_verified', 'unknown')}"
+    )
+
+# ===========================================================================
+# Out-of-scope archive
+# ===========================================================================
+with archive_tab:
+    st.subheader("Modules outside the blind/low-vision v1 scope")
+    st.write(
+        "These modules are kept because they existed in the original project. They "
+        "are prototypes for different user groups and are not part of the Sahaaya "
+        "Drishti v1 release."
+    )
+
+    archive_choice = st.radio(
+        "Choose a prototype",
+        ["Classroom reader", "ISL practice", "AAC phrase board"],
+        horizontal=True,
+    )
+
+    if archive_choice == "Classroom reader":
+        title = st.selectbox("Lesson", classroom.get_lesson_titles())
+        lesson = classroom.get_lesson(title)
+        worksheet = st.text_area("Worksheet text", value=lesson["text"], height=150)
+        st.caption(f"Simplified summary: {lesson['simplified']}")
+
+        speed = st.slider("Speech speed factor", 0.5, 1.5, 1.0, 0.1)
+        if st.button("🔊 Read worksheet", key="speak_worksheet"):
+            audio = rag.text_to_speech_audio(worksheet, language, speed=speed)
+            if audio:
+                st.audio(audio, format="audio/mp3")
+            else:
+                st.warning("Speech is unavailable (gTTS is not installed).")
 
         st.markdown("---")
-        st.subheader("📝 Automated Comprehension Quiz")
-        for i, q in enumerate(lesson_data["questions"]):
-            st.write(f"**Q{i+1}: {q['q']}**")
-            pick = st.radio(f"Select answer for Q{i+1}:", q["options"], key=f"q_{selected_title}_{i}")
-            if pick == q["correct"]:
-                st.success(f"✅ {q['feedback']}")
-
-# ==============================================================================
-# TAB 4: STREET HAZARD COMPUTER VISION
-# ==============================================================================
-with tabs[3]:
-    st.subheader("🚸 Street Hazard Computer Vision & Mobility (Pure Python)")
-    st.markdown(
-        "Supplements white canes and mobility aids by analyzing camera snapshots for "
-        "**open potholes, storm drains (nalas), low hanging overhead wires, and obstacles**."
-    )
-
-    v_col1, v_col2 = st.columns([1, 1])
-
-    with v_col1:
-        hazard_cam = st.camera_input("📸 Capture Street Walking Path")
-        hazard_file = st.file_uploader("Or upload street scene photo", type=["jpg", "jpeg", "png"], key="hazard_upload")
-        active_hazard_img = hazard_cam or hazard_file
-
-    with v_col2:
-        if active_hazard_img:
-            pil_img = Image.open(active_hazard_img)
-            analysis = vision.analyze_street_image(pil_img)
-
-            st.image(analysis["annotated_image"], caption="Annotated Hazard Inspection", use_container_width=True)
-
-            if analysis["is_danger"]:
-                st.markdown(f"""
-                <div class="hazard-box-danger">
-                    <h3>{analysis['primary_status']}</h3>
-                    <p><b>Recommended Action:</b> {analysis['primary_action']}</p>
-                    <p><b>Tactile Haptic Pattern:</b> {analysis['primary_haptic']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="hazard-box-safe">
-                    <h3>{analysis['primary_status']}</h3>
-                    <p>{analysis['primary_action']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-            audio_fp = rag.text_to_speech_audio(f"{analysis['primary_status']}. {analysis['primary_action']}", target_lang)
-            if audio_fp:
-                st.audio(audio_fp, format="audio/mp3")
-        else:
-            st.info("💡 Position camera toward your walking path or upload a test street image.")
-
-    st.markdown("---")
-    st.subheader("🆘 Emergency SOS Beacon & Geolocation Broadcast")
-    sos_col1, sos_col2 = st.columns(2)
-    with sos_col1:
-        if st.button("🚨 TRIGGER EMERGENCY SOS BEACON", type="primary"):
-            st.error("🚨 EMERGENCY SOS BROADCAST ACTIVATED!")
-            st.write("Vibrating Morse SOS pattern: `••• --- •••`")
-            st.audio(rag.text_to_speech_audio("Emergency SOS beacon activated! Assisting person nearby.", "en"), format="audio/mp3")
-    with sos_col2:
-        maps_link = "https://maps.google.com/?q=28.6139,77.2090"
-        wa_url = f"https://wa.me/?text=EMERGENCY%3A+I+need+assistance.+My+current+location+is+{maps_link}"
-        st.markdown(f'<a href="{wa_url}" target="_blank"><button style="padding:10px 20px; background:#25D366; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">📲 Send SOS on WhatsApp</button></a>', unsafe_allow_html=True)
-
-# ==============================================================================
-# TAB 5: INDIAN SIGN LANGUAGE STUDIO
-# ==============================================================================
-with tabs[4]:
-    st.subheader("🤟 Indian Sign Language (ISL) Education Studio (Pure Python)")
-    st.markdown(
-        "Standardized curriculum aligned with **ISLRTC & NCERT Channel 31** guidelines. "
-        "Learn essential gestures for Indian classrooms, healthcare, transit, and emergencies."
-    )
-
-    selected_cat = st.selectbox("Select ISL Category:", isl.get_categories())
-    signs_list = isl.get_signs_by_category(selected_cat)
-
-    cols = st.columns(len(signs_list))
-    for idx, item in enumerate(signs_list):
-        with cols[idx]:
-            st.markdown(f"""
-            <div style="background:#E6F0ED; padding:16px; border-radius:10px; border:2px solid #00796B; text-align:center; min-height:220px;">
-                <div style="font-size:2.6rem;">{item['icon']}</div>
-                <h4 style="margin:8px 0; color:#004D40;">{item['name']}</h4>
-                <p style="font-size:0.85rem; color:#48656E;">{item['instructions']}</p>
-            </div>
-            """, unsafe_allow_html=True)
-            if st.button("🔊 Listen", key=f"isl_speak_{idx}"):
-                audio_fp = rag.text_to_speech_audio(f"{item['name']}. {item['instructions']}", target_lang)
-                if audio_fp:
-                    st.audio(audio_fp, format="audio/mp3")
-
-    st.markdown("---")
-    st.subheader("🎯 Test Your Knowledge: Randomized ISL Practice Quiz")
-    if st.button("🎲 Generate New Question"):
-        st.session_state["isl_quiz"] = isl.generate_quiz_question()
-
-    active_quiz = st.session_state.get("isl_quiz", isl.generate_quiz_question())
-    st.write(f"### {active_quiz['question']}")
-    quiz_cols = st.columns(len(active_quiz["options"]))
-    for i, opt in enumerate(active_quiz["options"]):
-        with quiz_cols[i]:
-            if st.button(f"{opt['icon']} {opt['name']}", key=f"quiz_opt_{i}"):
-                if opt["id"] == active_quiz["correct_id"]:
-                    st.success("🎉 Correct Answer! Excellent.")
+        st.markdown("#### Comprehension check")
+        st.caption("Feedback appears only after you press Check.")
+        for index, question in enumerate(lesson["questions"]):
+            st.write(f"**Q{index + 1}. {question['q']}**")
+            pick = st.radio(
+                "Your answer",
+                question["options"],
+                index=None,
+                key=f"cls_{title}_{index}",
+                label_visibility="collapsed",
+            )
+            submitted_key = f"cls_submitted_{title}_{index}"
+            if st.button("Check", key=f"cls_check_{title}_{index}"):
+                st.session_state[submitted_key] = pick
+            if submitted_key in st.session_state:
+                answer = st.session_state[submitted_key]
+                if answer is None:
+                    st.info("Choose an option first.")
+                elif answer == question["correct"]:
+                    st.success(question["feedback"])
                 else:
-                    st.error(f"❌ Not quite. {active_quiz['explanation']}")
+                    st.error(f"Not correct. {question['feedback']}")
 
-# ==============================================================================
-# TAB 6: AAC INDIAN SITUATION BOARD
-# ==============================================================================
-with tabs[5]:
-    st.subheader("🗣️ Augmentative & Alternative Communication (AAC) Board (Pure Python)")
-    st.markdown("Rapid dialogue presets for Indian clinics, auto-rickshaws, ration/kirana shops, and government offices.")
+    elif archive_choice == "ISL practice":
+        category = st.selectbox("Category", isl.get_categories())
+        for sign in isl.get_signs_by_category(category):
+            with st.expander(f"{sign['icon']} {sign['name']}"):
+                st.write(sign["instructions"])
 
-    chosen_sit = st.selectbox("Select Situation:", aac.get_situations())
-    phrases = aac.get_phrases(chosen_sit)
+        st.markdown("---")
+        if "isl_quiz" not in st.session_state:
+            st.session_state["isl_quiz"] = isl.generate_quiz_question()
+        if st.button("New question", key="new_isl_question"):
+            st.session_state["isl_quiz"] = isl.generate_quiz_question()
+            st.session_state.pop("isl_answer", None)
 
-    phrase_options = [aac.get_translated_text(p, target_lang) for p in phrases]
-    selected_dialogue = st.selectbox("Select Phrase to Display & Speak:", phrase_options)
+        quiz = st.session_state["isl_quiz"]
+        st.write(f"**{quiz['question']}**")
+        choice = st.radio(
+            "Your answer",
+            [option["name"] for option in quiz["options"]],
+            index=None,
+            key=f"isl_choice_{quiz['correct_id']}",
+        )
+        if st.button("Check answer", key="check_isl"):
+            if choice is None:
+                st.info("Choose an option first.")
+            elif choice == quiz["target"]["name"]:
+                st.success("Correct.")
+            else:
+                st.error(f"Not correct. {quiz['explanation']}")
 
-    st.markdown("### 🔄 180° Tabletop Flip View (Show across desk/counter):")
-    st.markdown(f"""
-    <div class="flip-card-view">
-        <h2 style="color:#B45309; margin:0;">{selected_dialogue}</h2>
-    </div>
-    """, unsafe_allow_html=True)
+    else:
+        st.caption(
+            "The AAC board is translated into English, Hindi, Tamil, Telugu and "
+            "Kannada only. Other languages are not offered here, because the "
+            "previous version silently showed Hindi."
+        )
+        situation = st.selectbox("Situation", aac.get_situations())
+        phrases = aac.get_phrases(situation)
+        labels = [aac.get_translated_text(phrase, "en") for phrase in phrases]
+        selected_index = st.selectbox(
+            "Phrase", range(len(labels)), format_func=lambda index: labels[index]
+        )
+        phrase = phrases[selected_index]
+        translated = aac.get_translation(phrase, language)
+        if not translated["supported"]:
+            st.warning(
+                f"This phrase is not translated into {translated['fallback_from']}. "
+                f"Showing {translated['language_name']} instead."
+            )
+        st.markdown(
+            f"<div style='background:#fef3c7;border:2px solid #b45309;padding:20px;"
+            f"border-radius:10px;font-size:1.4rem;text-align:center'>"
+            f"{translated['text']}</div>",
+            unsafe_allow_html=True,
+        )
+        if st.button("🔊 Speak phrase", key="speak_aac"):
+            audio = rag.text_to_speech_audio(translated["text"], language)
+            if audio:
+                st.audio(audio, format="audio/mp3")
+            else:
+                st.warning("Speech is unavailable (gTTS is not installed).")
 
-    if st.button("🔊 Speak Phrase Out Loud", type="primary"):
-        audio_fp = rag.text_to_speech_audio(selected_dialogue, target_lang)
-        if audio_fp:
-            st.audio(audio_fp, format="audio/mp3")
-
-# ==============================================================================
-# TAB 7: INDIA DEMOGRAPHICS & SCHEMES DASHBOARD
-# ==============================================================================
-with tabs[6]:
-    st.subheader("📊 India Disability Demographics & Welfare Schemes Hub (Pure Python)")
-    st.markdown("Verified statistical landscape compiled from Census of India, NSS, LASI, and WHO-UNICEF reports.")
-
-    metric_c1, metric_c2, metric_c3, metric_c4 = st.columns(4)
-    with metric_c1:
-        st.metric("Total Population", "1.48 Billion", "Global Rank #1")
-    with metric_c2:
-        st.metric("Disability Rate", "2.21%", "~2.68 Cr citizens")
-    with metric_c3:
-        st.metric("Unmet Tech Need", "70%", "WHO-UNICEF GReAT")
-    with metric_c4:
-        st.metric("Out-of-Pocket Cost", "67.4%", "Paid by Families")
+# ===========================================================================
+# Safety and status
+# ===========================================================================
+with safety_tab:
+    st.subheader("Emergency")
+    st.write("A phone call is the only reliable emergency action. Location is not attached automatically.")
+    st.link_button("📞 Call 112", "tel:112")
+    st.markdown(
+        "[Send a WhatsApp message](https://wa.me/?text=EMERGENCY%3A%20I%20need%20assistance.) "
+        "— then attach your live location inside WhatsApp. This prototype does not "
+        "read your GPS."
+    )
 
     st.markdown("---")
-    st.subheader("Top Indian States by Disability Population Share")
+    st.subheader("What this build does not do")
+    st.markdown(
+        "- It does **not** detect counterfeit notes.\n"
+        "- It does **not** say a walking path is clear.\n"
+        "- It does **not** estimate distance in metres.\n"
+        "- It does **not** broadcast an SOS or a location.\n"
+        "- It does **not** run in real time; Streamlit is a still-frame demo.\n"
+        "- It does **not** support nine languages everywhere."
+    )
 
-    state_data = {
-        "Uttar Pradesh": {"share": "15.5% - 16.5%", "blind": "~7.63 Lakh", "notes": "Steep affordability barrier; rural families lack digital tools and rely on mechanical slates."},
-        "Maharashtra": {"share": "11.05%", "blind": "High", "notes": "Significant adult workforce disability burden; rural Marathwada and Vidarbha face training gaps."},
-        "Bihar": {"share": "8.69%", "blind": "High", "notes": "Multidimensional poverty clusters; digital hearing aids (₹20k+) and cochlear implants are unaffordable."},
-        "Andhra Pradesh": {"share": "8.45%", "blind": "High", "notes": "High rural density; lack of localized Telugu assistive tools."},
-        "West Bengal": {"share": "7.52%", "blind": "High", "notes": "High elderly sensory decline (presbycusis and cataracts); urgent need for Bengali audio tools."}
-    }
+    st.subheader("Data status")
+    st.markdown(
+        f"- Scheme dataset: `{schemes.dataset_path}` · "
+        f"{len(schemes.schemes)} records · verified "
+        f"{schemes.dataset.get('last_verified', 'unknown')}.\n"
+        f"- Currency model: "
+        f"{'loaded' if currency.model_available else 'not installed'}.\n"
+        "- Demographics file: see the corrected notes in "
+        "`knowledge_base/demographics_data.json`."
+    )
 
-    for s_name, s_info in state_data.items():
-        st.markdown(f"**📍 {s_name}** — National Share: **{s_info['share']}** | Context: {s_info['notes']}")
-
-    st.markdown("---")
-    st.subheader("🏛️ Central Government Welfare Schemes & Helplines")
-    st.markdown("""
-    - **ADIP Scheme**: 100% free or subsidized smart canes, hearing aids, and wheelchairs for families with monthly income under ₹15,000.  
-      🔗 [ADIP Portal](https://adip.depwd.gov.in/) | Toll-Free ALIMCO Helpline: **1800-180-5129**
-    - **UDID Card (Swavlamban)**: Universal disability card enabling up to 75% concessions in Indian Railways.  
-      🔗 [Swavlamban Portal](https://www.swavlambancard.gov.in/)
-    - **RPwD Act 2016**: 4% government job reservation and 5% higher education reservation.
-    """)
+    st.subheader("Where the real app lives")
+    st.markdown(
+        "- `android/` — Kotlin client (CameraX, TFLite, ML Kit, TalkBack, haptics).\n"
+        "- `ml/currency/` — training, calibration, export and evaluation.\n"
+        "- `ml/rag/` — retrieval evaluation harness.\n"
+        "- `backend/` — read-only scheme update API.\n"
+        "- `docs/CLAIMS_MATRIX.md` — every public claim and its evidence."
+    )

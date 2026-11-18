@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/screen_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/nav_bg"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/btn_nav_money"
+            style="@style/Widget.Sahaaya.NavButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/nav_money" />
+
+        <Button
+            android:id="@+id/btn_nav_document"
+            style="@style/Widget.Sahaaya.NavButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/nav_document" />
+
+        <Button
+            android:id="@+id/btn_nav_schemes"
+            style="@style/Widget.Sahaaya.NavButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/nav_schemes" />
+
+        <Button
+            android:id="@+id/btn_nav_settings"
+            style="@style/Widget.Sahaaya.NavButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/nav_settings" />
+    </LinearLayout>
+</LinearLayout>

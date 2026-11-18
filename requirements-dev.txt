@@ -1,0 +1,10 @@
+-r requirements.txt
+
+pytest~=8.3
+pytest-cov~=6.0
+ruff~=0.8
+jsonschema~=4.23
+
+# Backend tests (read-only dataset service).
+fastapi~=0.115
+httpx~=0.27

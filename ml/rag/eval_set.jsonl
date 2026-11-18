@@ -1,0 +1,14 @@
+{"query": "What documents do I need for ADIP?", "expected_ids": ["adip"]}
+{"query": "ADIP income limit for a hearing aid", "expected_ids": ["adip"]}
+{"query": "Is there a subsidy for a smart cane under ADIP?", "expected_ids": ["adip"]}
+{"query": "How do I apply for a UDID card?", "expected_ids": ["udid"]}
+{"query": "What is the Swavlamban card?", "expected_ids": ["udid"]}
+{"query": "What reservation does the RPwD Act give in government jobs?", "expected_ids": ["rpwd-act-2016"]}
+{"query": "How much reservation in higher education for disabled students?", "expected_ids": ["rpwd-act-2016"]}
+{"query": "What is Sugamya Bharat Abhiyan?", "expected_ids": ["sugamya-bharat"]}
+{"query": "Which campaign builds ramps and tactile paving in public buildings?", "expected_ids": ["sugamya-bharat"]}
+{"query": "ADIP subsidy if my family income is 20000 per month", "expected_ids": ["adip"], "profile": {"disability_percent": 60, "monthly_income_inr": 20000, "has_udid": true, "has_aadhaar": true}}
+{"query": "ADIP eligibility if income is exactly 22500", "expected_ids": ["adip"], "profile": {"disability_percent": 40, "monthly_income_inr": 22500, "has_udid": true, "has_aadhaar": true}}
+{"query": "Is there a free helicopter scheme?", "expected_ids": [], "expect_refusal": true}
+{"query": "What is the capital of Finland?", "expected_ids": [], "expect_refusal": true}
+{"query": "Tell me about a Karnataka state scheme that is not in this dataset", "expected_ids": [], "expect_refusal": true}

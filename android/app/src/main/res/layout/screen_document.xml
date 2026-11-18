@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/document_status"
+        style="@style/TextAppearance.Sahaaya.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/document_prompt" />
+
+    <TextView
+        android:id="@+id/document_script_label"
+        style="@style/TextAppearance.Sahaaya.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:labelFor="@id/document_script"
+        android:text="@string/document_script_label" />
+
+    <Spinner
+        android:id="@+id/document_script"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/document_script_labels"
+        android:minHeight="56dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="3">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/document_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/preview_description" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="24dp"
+            android:background="@drawable/guide_box"
+            android:contentDescription="@string/document_guide_description" />
+    </FrameLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="4"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/document_text"
+            style="@style/TextAppearance.Sahaaya.Result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityLiveRegion="polite"
+            android:background="@drawable/bg_result"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:minHeight="120dp"
+            android:padding="14dp"
+            android:text="@string/document_result_placeholder"
+            android:textIsSelectable="true" />
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_document_capture"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_capture_page" />
+
+        <Button
+            android:id="@+id/btn_document_read"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_read_aloud" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_document_share"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_share_text" />
+
+        <Button
+            android:id="@+id/btn_document_stop"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_stop_speaking" />
+    </LinearLayout>
+
+    <TextView
+        style="@style/TextAppearance.Sahaaya.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/document_scope_note"
+        android:textColor="@color/muted"
+        android:textSize="14sp" />
+</LinearLayout>

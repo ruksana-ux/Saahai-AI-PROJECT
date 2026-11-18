@@ -1,48 +1,62 @@
 {
+  "metadata": {
+    "last_reviewed": "2026-11-18",
+    "verification_status": "partially-verified",
+    "notes": [
+      "The original file mixed a 2011 census percentage with a 2026 population estimate, producing an incorrect '26.8 million' claim for 2026.",
+      "Census 2011 counted 26.8 million persons with disabilities out of a population of about 1.21 billion (2.21%).",
+      "Applying 2.21% to a 1.48 billion 2026 estimate gives about 32.7 million. That is an illustrative projection, not a census count. Report it as a projection.",
+      "State shares below are carried over from the original project and are marked needs-review until the Census table is re-checked."
+    ]
+  },
   "demographics": {
-    "total_population_estimate_2026": "1,480,560,451 (Global Rank 1, ~17.8% of world population)",
-    "population_density": "497 people per square kilometer",
-    "median_age": "29.2 years",
-    "overall_disability_percentage": "2.21% (Census 2011, NSS, LASI), representing over 26.8 million citizens",
-    "visual_impairment_seeing": "18.8% of disabled population (~0.42% of total population). In adults 45+, LASI indicates 33.8% suffer from distance vision impairment and 43% near-vision impairment.",
-    "hearing_impairment": "18.9% of disabled population (~0.42% national share). WHO clinical estimates place significant hearing loss higher at roughly 6.3%. In seniors 65+, 1 in 3 (33.3%) experience presbycusis.",
-    "speech_impairment_mute": "7.5% of disabled population (~0.16% of total population). Prevalent in early childhood (ages 5-14) during language acquisition.",
+    "total_population_estimate_2026": "about 1.48 billion (projection; not a census count)",
+    "population_density": "about 497 people per square kilometre (projection)",
+    "median_age": "about 29 years (projection)",
+    "overall_disability_percentage": "2.21% in Census 2011, which counted 26.8 million persons with disabilities out of about 1.21 billion people",
+    "projected_disability_population_2026": "about 32.7 million if the 2011 rate is applied to a 1.48 billion population (illustrative projection, not an official count)",
+    "visual_impairment_seeing": "18.8% of the disabled population in Census 2011; LASI reports much higher age-related vision impairment among adults 45+",
+    "hearing_impairment": "18.9% of the disabled population in Census 2011; clinical hearing-loss estimates are higher because they use a different definition",
+    "speech_impairment_mute": "7.5% of the disabled population in Census 2011",
     "top_states_by_disability_burden": [
       {
         "rank": 1,
         "state": "Uttar Pradesh",
-        "national_share": "15.5% - 16.5%",
-        "visual_impairment_count": "~7.63 Lakh",
-        "key_challenges": "Highest raw population burden; low rural household incomes make digital screen readers and refreshable Braille unaffordable; dependency on basic mechanical slates."
+        "national_share": "15.5%",
+        "verification_status": "needs-review",
+        "key_challenges": "Large absolute population and low rural household incomes; assistive devices are often unaffordable without subsidy."
       },
       {
         "rank": 2,
         "state": "Maharashtra",
         "national_share": "11.05%",
-        "key_challenges": "Large working-age adult population; urban centers have tech access while rural regions like Vidarbha and Marathwada face deep gaps."
+        "verification_status": "needs-review",
+        "key_challenges": "Large working-age population; rural districts have fewer assistive-technology services than urban centres."
       },
       {
         "rank": 3,
         "state": "Bihar",
         "national_share": "8.69%",
-        "key_challenges": "Steep multidimensional poverty clusters; ₹20,000+ digital hearing aids and ₹12,00,000 cochlear implants are out of reach without philanthropy."
+        "verification_status": "needs-review",
+        "key_challenges": "High poverty and limited access to audiology and rehabilitation services."
       },
       {
         "rank": 4,
         "state": "Andhra Pradesh",
         "national_share": "8.45%",
-        "key_challenges": "High rural concentration; severe shortage of Telugu-first accessible screen reading tools."
+        "verification_status": "needs-review",
+        "key_challenges": "Rural concentration and a shortage of Telugu-first accessible reading tools."
       },
       {
         "rank": 5,
         "state": "West Bengal",
         "national_share": "7.52%",
-        "key_challenges": "High age-related sensory decline (cataracts and presbycusis); urgent need for Bengali audio and tactile resources."
+        "verification_status": "needs-review",
+        "key_challenges": "Age-related vision and hearing decline; demand for Bengali audio and tactile resources."
       }
     ],
-    "unmet_technology_need": "70% to 71% of people with disabilities in India lack access to necessary assistive hardware and software (WHO-UNICEF GReAT report).",
-    "out_of_pocket_crisis": "67.4% of all assistive technology items acquired in India must be paid for completely out-of-pocket by low-income families.",
-    "rural_divide": "68% of India's disabled population resides in rural areas with minimal tech training centers or repair infrastructure."
+    "unmet_technology_need": "70-71% of people with disabilities in India lack access to necessary assistive products (WHO-UNICEF GReAT report, as cited in the original project; re-check the exact table before publication)",
+    "out_of_pocket_crisis": "67.4% of assistive products in India are paid for out of pocket (source to be re-checked)",
+    "rural_divide": "68% of India's disabled population lives in rural areas (source to be re-checked)"
   }
 }
-

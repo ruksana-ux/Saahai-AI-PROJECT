@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.0",
+  "dataset_version": "2026.11.18",
+  "last_verified": "2026-11-18",
+  "notes": [
+    "Every scheme record must have an official source_url and a last_verified date.",
+    "review_due is the date after which the record must be re-checked before it is shown as current.",
+    "This file is the single source of truth for the app and the backend. Do not duplicate eligibility rules in code."
+  ],
+  "schemes": [
+    {
+      "id": "adip",
+      "name": "ADIP Scheme (Assistance to Disabled Persons for Purchase/Fitting of Aids and Appliances)",
+      "aliases": ["adip", "aids and appliances", "assistive devices scheme", "alimco", "arjun portal"],
+      "category": "assistive-devices",
+      "jurisdiction": "India",
+      "summary": "Central Sector scheme that subsidises assistive devices such as hearing aids, smart canes, wheelchairs, prostheses and smartphones for persons with disabilities.",
+      "eligibility": {
+        "disability_percent_min": 40,
+        "requires_udid": true,
+        "requires_aadhaar": true,
+        "income_slabs": [
+          {
+            "max_monthly_inr": 22500,
+            "subsidy_percent": 100
+          },
+          {
+            "min_monthly_inr": 22501,
+            "max_monthly_inr": 30000,
+            "subsidy_percent": 50
+          }
+        ],
+        "notes": [
+          "Applicant must hold a UDID card or UDID enrolment number with at least 40% disability.",
+          "Aadhaar or Aadhaar enrolment number is required.",
+          "Above ₹30,000 monthly family income the scheme does not provide a subsidy."
+        ]
+      },
+      "benefits": [
+        "Up to ₹15,000 for aids and assistive devices, once in 3 years.",
+        "Up to ₹30,000 for high-end prostheses.",
+        "Up to ₹50,000 subsidy for motorised tricycles or motorised wheelchairs, once in 5 years."
+      ],
+      "documents_required": [
+        "UDID card or UDID enrolment number",
+        "Disability certificate showing at least 40%",
+        "Aadhaar or Aadhaar enrolment number",
+        "Income proof for the subsidy slab",
+        "Passport-size photograph",
+        "Bank account details"
+      ],
+      "how_to_apply": [
+        "Register or log in on the ARJUN portal (adip.depwd.gov.in).",
+        "Select the required aid or appliance and the nearest implementing agency.",
+        "Attend the assessment at the implementing agency or PMD-VK centre.",
+        "Collect the device after approval; do not pay the subsidised portion twice."
+      ],
+      "portal_url": "https://adip.depwd.gov.in/",
+      "helpline": "ALIMCO 1800 180 5129",
+      "source_url": "https://depwd.gov.in/en/adip-scheme/",
+      "last_verified": "2026-11-18",
+      "review_due": "2027-03-31",
+      "verification_status": "official-source-checked",
+      "notes": [
+        "Income slabs and benefit caps were read from the Department of Empowerment of Persons with Disabilities page on 2026-11-18.",
+        "The page states the scheme was last revised on 26.09.2024.",
+        "Re-check after 31 March 2027 or whenever the department publishes a new revision."
+      ]
+    },
+    {
+      "id": "udid",
+      "name": "UDID Card (Unique Disability ID / Swavlamban Card)",
+      "aliases": ["udid", "unique disability id", "swavlamban", "disability card", "disability certificate"],
+      "category": "identity",
+      "jurisdiction": "India",
+      "summary": "A single digital disability identity card issued through the Swavlamban portal, intended to replace multiple state-level disability certificates.",
+      "eligibility": {
+        "disability_percent_min": 0,
+        "requires_udid": false,
+        "requires_aadhaar": true,
+        "income_slabs": [],
+        "notes": [
+          "Any person with a recognised disability can apply.",
+          "The medical assessment decides the certified disability percentage.",
+          "Aadhaar is used for identity verification."
+        ]
+      },
+      "benefits": [
+        "Single card accepted for disability-related benefits across states.",
+        "Used to apply for ADIP devices, scholarships and pension schemes.",
+        "Supports rail and state transport concession claims, subject to the operator's current rules."
+      ],
+      "documents_required": [
+        "Aadhaar card",
+        "Recent passport-size photograph",
+        "Medical reports or existing disability certificate",
+        "Address proof",
+        "Mobile number for OTP"
+      ],
+      "how_to_apply": [
+        "Create an account on swavlambancard.gov.in.",
+        "Fill the disability application and choose a nearby medical authority.",
+        "Book and attend the assessment.",
+        "Download the e-UDID card after approval."
+      ],
+      "portal_url": "https://www.swavlambancard.gov.in/",
+      "helpline": "Check the Swavlamban portal contact page",
+      "source_url": "https://www.swavlambancard.gov.in/",
+      "last_verified": "2026-11-18",
+      "review_due": "2027-03-31",
+      "verification_status": "official-portal-checked",
+      "notes": [
+        "Do not state that the card is free; fees and timelines vary by state and assessment centre.",
+        "Do not promise a specific rail concession percentage; categories differ."
+      ]
+    },
+    {
+      "id": "rpwd-act-2016",
+      "name": "Rights of Persons with Disabilities Act, 2016",
+      "aliases": ["rpwd", "rpwd act", "rights act", "4 percent reservation", "5 percent education"],
+      "category": "rights",
+      "jurisdiction": "India",
+      "summary": "Rights-based law covering 21 recognised disabilities, non-discrimination, accessibility and reservation in employment and higher education.",
+      "eligibility": {
+        "disability_percent_min": 0,
+        "requires_udid": false,
+        "requires_aadhaar": false,
+        "income_slabs": [],
+        "notes": [
+          "Applies to persons with one or more of the 21 recognised disabilities.",
+          "Reservation in government establishments is 4% for persons with benchmark disabilities.",
+          "Reservation in higher education institutions is 5%."
+        ]
+      },
+      "benefits": [
+        "4% reservation in government establishments for benchmark disabilities.",
+        "5% reservation in government and government-aided higher education institutions.",
+        "Protection from discrimination and a right to accessible public infrastructure.",
+        "Accessibility obligations for public transport, buildings and government websites."
+      ],
+      "documents_required": [
+        "Disability certificate or UDID card for reservation claims",
+        "Proof of disability category for the specific reservation"
+      ],
+      "how_to_apply": [
+        "For employment reservation, follow the recruiting body's notification and attach the disability certificate.",
+        "For education reservation, apply through the institution's admission process and attach the certificate.",
+        "For discrimination complaints, approach the relevant State Commissioner for Persons with Disabilities."
+      ],
+      "portal_url": "https://depwd.gov.in/en/",
+      "helpline": "State Commissioner for Persons with Disabilities",
+      "source_url": "https://www.indiacode.nic.in/handle/123456789/2155",
+      "last_verified": "2026-11-18",
+      "review_due": "2027-03-31",
+      "verification_status": "official-source-checked",
+      "notes": [
+        "The Act text is stable; reservation implementation notifications change, so cite the recruiting body's notice.",
+        "Do not describe the 4% and 5% figures as applying to all posts or all institutions without checking the notification."
+      ]
+    },
+    {
+      "id": "sugamya-bharat",
+      "name": "Sugamya Bharat Abhiyan (Accessible India Campaign)",
+      "aliases": ["sugamya bharat", "accessible india", "accessibility campaign", "ramps", "tactile paving"],
+      "category": "accessibility",
+      "jurisdiction": "India",
+      "summary": "A national campaign to improve accessibility of the built environment, transport and information and communication systems.",
+      "eligibility": {
+        "disability_percent_min": 0,
+        "requires_udid": false,
+        "requires_aadhaar": false,
+        "income_slabs": [],
+        "notes": [
+          "This is an infrastructure and standards campaign, not a cash benefit.",
+          "It does not provide individual devices or pensions."
+        ]
+      },
+      "benefits": [
+        "Accessibility standards for buildings, transport and government websites.",
+        "Tactile paving, ramps, lifts and accessible toilets in public infrastructure.",
+        "Auditory and visual announcements in supported transport systems."
+      ],
+      "documents_required": [],
+      "how_to_apply": [
+        "There is no individual application. Report an inaccessible public facility to the local municipal body or the department's grievance channel."
+      ],
+      "portal_url": "https://depwd.gov.in/en/",
+      "helpline": "Local municipal grievance cell",
+      "source_url": "https://depwd.gov.in/en/",
+      "last_verified": "2026-11-18",
+      "review_due": "2027-03-31",
+      "verification_status": "official-portal-checked",
+      "notes": [
+        "Do not present this as a device grant or a cash transfer.",
+        "Do not claim a specific number of retrofitted stations without a dated source."
+      ]
+    }
+  ]
+}

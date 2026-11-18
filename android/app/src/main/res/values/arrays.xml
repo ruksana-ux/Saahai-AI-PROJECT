@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="language_labels">
+        <item>English (India)</item>
+        <item>हिन्दी (Hindi)</item>
+        <item>தமிழ் (Tamil)</item>
+        <item>తెలుగు (Telugu)</item>
+        <item>ಕನ್ನಡ (Kannada)</item>
+        <item>বাংলা (Bengali)</item>
+        <item>മലയാളം (Malayalam)</item>
+        <item>मराठी (Marathi)</item>
+        <item>ગુજરાતી (Gujarati)</item>
+    </string-array>
+
+    <string-array name="language_tags">
+        <item>en-IN</item>
+        <item>hi-IN</item>
+        <item>ta-IN</item>
+        <item>te-IN</item>
+        <item>kn-IN</item>
+        <item>bn-IN</item>
+        <item>ml-IN</item>
+        <item>mr-IN</item>
+        <item>gu-IN</item>
+    </string-array>
+
+    <string-array name="document_script_labels">
+        <item>@string/script_latin</item>
+        <item>@string/script_devanagari</item>
+    </string-array>
+</resources>

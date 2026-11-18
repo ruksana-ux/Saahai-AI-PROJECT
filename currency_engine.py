@@ -1,179 +1,407 @@
 """
-Sahaaya AI — Indian Rupee & Medicine Engine (Pure Python)
-Classifies banknotes & coins (addressing RBI MANI gaps) and analyzes medicine labels.
+Sahaaya AI - Indian currency metadata and a real model loader.
+
+This replaces the old colour heuristic that returned a hard-coded 91-97%
+"confidence" from the mean pixel colour of the image. That was not a
+classifier. Now:
+
+  * if a trained TFLite model is present, it is used;
+  * if no model is present, the result is ``model_unavailable`` and no
+    confidence number is invented;
+  * low-confidence predictions are reported as ``uncertain`` with a top-2 list;
+  * a trained "unknown / not a note" class is required for rejection.
+
+Tactile facts below were checked against RBI's "For Visually Impaired" page
+(https://indiancurrency.rbi.org.in/visual-impairment) on 2026-11-18.
 """
 
-from typing import Dict, Any, List
-from PIL import Image
+from __future__ import annotations
+
+import json
+import os
+from typing import Any, Dict, List, Optional
+
 import numpy as np
+from PIL import Image
+
+try:  # optional at runtime; the prototype still runs without TensorFlow
+    import tensorflow as tf
+
+    TF_AVAILABLE = True
+except Exception:  # noqa: BLE001 - TF can raise OSError on unsupported CPUs
+    TF_AVAILABLE = False
+
+
+DEFAULT_MODEL_PATH = os.getenv(
+    "SAHAAYA_CURRENCY_MODEL", os.path.join("models", "currency", "currency_model.tflite")
+)
+DEFAULT_META_PATH = os.getenv(
+    "SAHAAYA_CURRENCY_META", os.path.join("models", "currency", "currency_model.json")
+)
+
+#: Minimum top-1 probability before the app states a denomination.
+CONFIDENCE_THRESHOLD = 0.80
+
+#: If the top-2 margin is below this, ask the user to rescan.
+MARGIN_THRESHOLD = 0.15
+
+
+CURRENCY_SPECS: Dict[str, Dict[str, Any]] = {
+    "2000": {
+        "name": "₹2000 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Magenta",
+        "motif": "Mangalyaan",
+        "bleed_lines": 7,
+        "tactile_mark": (
+            "7 angular bleed lines and a raised horizontal rectangle with the "
+            "denomination. RBI has announced withdrawal from circulation; the note "
+            "remains legal tender."
+        ),
+        "haptic_pattern": "seven long pulses",
+        "rbi_verified": True,
+    },
+    "500": {
+        "name": "₹500 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Stone grey",
+        "motif": "Red Fort",
+        "bleed_lines": 5,
+        "tactile_mark": (
+            "5 angular bleed lines in three blocks on the left and right edges, "
+            "plus a raised circle containing the denomination."
+        ),
+        "haptic_pattern": "five long pulses",
+        "rbi_verified": True,
+    },
+    "200": {
+        "name": "₹200 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Bright yellow",
+        "motif": "Sanchi Stupa",
+        "bleed_lines": 4,
+        "tactile_mark": (
+            "4 angular bleed lines with 2 circles in between, plus a raised "
+            "'H' identification mark with microtext ₹200."
+        ),
+        "haptic_pattern": "four long pulses, slow",
+        "rbi_verified": True,
+    },
+    "100": {
+        "name": "₹100 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Lavender",
+        "motif": "Rani ki Vav",
+        "bleed_lines": 4,
+        "tactile_mark": (
+            "4 angular bleed lines, plus a raised triangular identification mark "
+            "with microtext ₹100 above the Ashoka Pillar emblem."
+        ),
+        "haptic_pattern": "four long pulses, fast",
+        "rbi_verified": True,
+    },
+    "50": {
+        "name": "₹50 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Fluorescent blue",
+        "motif": "Hampi with chariot",
+        "bleed_lines": 0,
+        "tactile_mark": (
+            "No bleed lines on this denomination. Use the raised intaglio print, "
+            "the note size, and the identification area above the Ashoka Pillar."
+        ),
+        "haptic_pattern": "two long pulses",
+        "rbi_verified": True,
+    },
+    "20": {
+        "name": "₹20 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Greenish yellow",
+        "motif": "Ellora Caves",
+        "bleed_lines": 0,
+        "tactile_mark": (
+            "No bleed lines on this denomination. Use the raised intaglio print "
+            "and the note size."
+        ),
+        "haptic_pattern": "one long pulse",
+        "rbi_verified": True,
+    },
+    "10": {
+        "name": "₹10 Banknote",
+        "kind": "note",
+        "series": "Mahatma Gandhi (New) Series",
+        "colour": "Chocolate brown",
+        "motif": "Konark Sun Temple",
+        "bleed_lines": 0,
+        "tactile_mark": (
+            "No bleed lines on this denomination. Use the raised intaglio print "
+            "and the note size."
+        ),
+        "haptic_pattern": "one short pulse",
+        "rbi_verified": True,
+    },
+    "coin_20": {
+        "name": "₹20 Coin",
+        "kind": "coin",
+        "series": "Current circulation",
+        "colour": "Silver / steel",
+        "motif": "12-sided polygon",
+        "bleed_lines": 0,
+        "tactile_mark": (
+            "12-sided (dodecagon) shape, designed so the edge can be counted by touch."
+        ),
+        "haptic_pattern": "three medium pulses",
+        "rbi_verified": False,
+    },
+    "coin_10": {
+        "name": "₹10 Coin",
+        "kind": "coin",
+        "series": "Current circulation",
+        "colour": "Bimetallic",
+        "motif": "Two-metal ring",
+        "bleed_lines": 0,
+        "tactile_mark": "Bimetallic: a distinct outer ring around an inner disc.",
+        "haptic_pattern": "two medium pulses with a long gap",
+        "rbi_verified": False,
+    },
+    "coin_5": {
+        "name": "₹5 Coin",
+        "kind": "coin",
+        "series": "Current circulation",
+        "colour": "Silver",
+        "motif": "Round",
+        "bleed_lines": 0,
+        "tactile_mark": "Round and larger than the ₹2 coin; smooth raised rim.",
+        "haptic_pattern": "two medium pulses",
+        "rbi_verified": False,
+    },
+    "coin_2": {
+        "name": "₹2 Coin",
+        "kind": "coin",
+        "series": "Current circulation",
+        "colour": "Silver",
+        "motif": "Round",
+        "bleed_lines": 0,
+        "tactile_mark": "Round, smaller than the ₹5 coin.",
+        "haptic_pattern": "one medium pulse",
+        "rbi_verified": False,
+    },
+    "coin_1": {
+        "name": "₹1 Coin",
+        "kind": "coin",
+        "series": "Current circulation",
+        "colour": "Silver",
+        "motif": "Round",
+        "bleed_lines": 0,
+        "tactile_mark": "Round and the smallest of the commonly circulated coins.",
+        "haptic_pattern": "one brief pulse",
+        "rbi_verified": False,
+    },
+}
+
+#: Label order must match the training output layer. See ml/currency/labels.txt.
+DEFAULT_LABELS: List[str] = [
+    "unknown",
+    "10",
+    "20",
+    "50",
+    "100",
+    "200",
+    "500",
+    "2000",
+    "coin_1",
+    "coin_2",
+    "coin_5",
+    "coin_10",
+    "coin_20",
+]
 
 
 class SahaayaCurrencyEngine:
-    """
-    100% Python Engine for Indian Currency and Medicine Identification:
-    - Identifies paper banknotes (₹10 - ₹500)
-    - Identifies coins (₹5, ₹10, ₹20 12-sided dodecagon)
-    - Anti-counterfeit verification checklists (tactile bleed lines, watermark, color shift)
-    - Medicine dosage parser and schedule instructions
-    """
+    """Metadata lookup plus optional on-device TFLite inference."""
 
-    CURRENCY_SPECS = {
-        "500": {
-            "name": "₹500 Banknote",
-            "series": "Mahatma Gandhi (New) Series",
-            "color": "Stone Grey",
-            "motif": "Red Fort, Delhi",
-            "tactile_mark": "Circle mark on right border with 5 angular bleed lines on both sides",
-            "haptic_pattern": "5 Heavy Pulses [300ms x 5]",
-            "security_checklist": [
-                "Tactile: 5 angular bleed lines on left and right borders for visually impaired.",
-                "Security Thread: Color shifts from green to blue when tilted, containing 'भारत' and 'RBI'.",
-                "Watermark: Electrotype Mahatma Gandhi portrait visible against back-light.",
-                "Intaglio Printing: Raised print of Mahatma Gandhi portrait and Ashoka Pillar."
-            ]
-        },
-        "200": {
-            "name": "₹200 Banknote",
-            "series": "Mahatma Gandhi (New) Series",
-            "color": "Bright Yellow",
-            "motif": "Sanchi Stupa, Madhya Pradesh",
-            "tactile_mark": "H-mark with two small circles on right border with 4 bleed lines",
-            "haptic_pattern": "4 Short Pulses [200ms x 4]",
-            "security_checklist": [
-                "Tactile: Raised 'H' mark with two circles in between.",
-                "Security Thread: Windowed color-shifting thread from green to blue.",
-                "Motif: Sanchi Stupa depicting India's architectural heritage."
-            ]
-        },
-        "100": {
-            "name": "₹100 Banknote",
-            "series": "Mahatma Gandhi (New) Series",
-            "color": "Lavender",
-            "motif": "Rani ki Vav (Queen's Stepwell), Gujarat",
-            "tactile_mark": "Raised Triangle mark on right border with 4 bleed lines",
-            "haptic_pattern": "3 Medium Pulses [200ms x 3]",
-            "security_checklist": [
-                "Tactile: Triangle symbol above Ashoka Pillar emblem.",
-                "Bleed Lines: 4 angular bleed lines on both sides.",
-                "Color: Vibrant Lavender shade with Gandhi portrait."
-            ]
-        },
-        "50": {
-            "name": "₹50 Banknote",
-            "series": "Mahatma Gandhi (New) Series",
-            "color": "Fluorescent Blue",
-            "motif": "Hampi with Chariot, Karnataka",
-            "tactile_mark": "Square tactile mark above emblem",
-            "haptic_pattern": "2 Pulses [200ms x 2]",
-            "security_checklist": [
-                "Color: Fluorescent Blue shade.",
-                "Tactile: Square symbol on the right.",
-                "Reverse: Chariot of Hampi UNESCO world heritage site."
-            ]
-        },
-        "20": {
-            "name": "₹20 Banknote / Coin",
-            "series": "Mahatma Gandhi (New) Series / 12-Sided Coin",
-            "color": "Greenish Yellow / Bimetallic Polygon",
-            "motif": "Ellora Caves (Note) / Grain Agricultural Motif (Coin)",
-            "tactile_mark": "12 distinct tactile corners (Coin) / Raised numeral 20 (Note)",
-            "haptic_pattern": "Double Pulse [150ms, 150ms]",
-            "security_checklist": [
-                "Coin: 12-sided Dodecagon shape designed specially for visually impaired citizens.",
-                "Outer Ring: Nickel-silver outer ring with Nickel-brass core.",
-                "Note: Greenish-yellow shade with Ellora caves motif."
-            ]
-        },
-        "10": {
-            "name": "₹10 Banknote / Coin",
-            "series": "Mahatma Gandhi (New) Series / Bimetallic Coin",
-            "color": "Chocolate Brown / Dual Ring Bimetallic",
-            "motif": "Sun Temple Konark, Odisha",
-            "tactile_mark": "Concentric double-metal boundary (Coin) / Geometric mark (Note)",
-            "haptic_pattern": "Single Pulse [150ms]",
-            "security_checklist": [
-                "Banknote: Chocolate brown with Konark Sun Temple chariot wheel.",
-                "Coin: Bimetallic 27mm composition with smooth plain edge."
-            ]
-        }
-    }
+    def __init__(self, model_path: str = DEFAULT_MODEL_PATH, meta_path: str = DEFAULT_META_PATH):
+        self.model_path = model_path
+        self.meta_path = meta_path
+        self.labels = list(DEFAULT_LABELS)
+        self.input_size = (224, 224)
+        self.normalisation = "raw_0_255"
+        self.temperature = 1.0
+        self.output_is_logits = True
+        self.interpreter = None
+        self.model_error: Optional[str] = None
+        self._load_model()
 
-    MEDICINES = {
-        "pcm": {
-            "name": "Paracetamol 500 mg",
-            "indication": "Fever, headache, and mild-to-moderate body aches",
-            "dosage": "1 tablet every 6 to 8 hours after food. Maximum 4 tablets in 24 hours.",
-            "caution": "⚠️ Danger: Overdose causes severe liver damage. Do not take with alcohol or other paracetamol products."
-        },
-        "met": {
-            "name": "Metformin 500 mg",
-            "indication": "Type-2 Diabetes blood glucose control",
-            "dosage": "1 tablet with or immediately after meals (breakfast / dinner).",
-            "caution": "⚠️ Caution: Do not skip meals after taking this tablet to prevent hypoglycemia."
-        },
-        "amox": {
-            "name": "Amoxicillin 250 mg",
-            "indication": "Antibiotic for bacterial throat, ear, and respiratory infections",
-            "dosage": "1 capsule 3 times daily at equal 8-hour intervals.",
-            "caution": "⚠️ Essential: Complete the full 5-day prescribed course even if you feel completely better."
-        },
-        "ors": {
-            "name": "Oral Rehydration Salts (ORS Electral)",
-            "indication": "Dehydration, diarrhea, vomiting, and heat exhaustion",
-            "dosage": "Dissolve 1 entire packet in exactly 1 liter of clean drinking water. Sip continuously.",
-            "caution": "⚠️ Note: Do not boil or heat the prepared solution. Discard leftover liquid after 24 hours."
-        }
-    }
+    # ------------------------------------------------------------------ model
+    def _load_model(self) -> None:
+        if not os.path.exists(self.model_path):
+            self.model_error = (
+                "No trained currency model is installed. The app will not guess a "
+                "denomination."
+            )
+            return
+        if not TF_AVAILABLE:
+            self.model_error = "TensorFlow Lite runtime is not installed in this environment."
+            return
 
-    def __init__(self):
-        pass
+        try:
+            if os.path.exists(self.meta_path):
+                with open(self.meta_path, "r", encoding="utf-8") as handle:
+                    meta = json.load(handle)
+                self.labels = meta.get("labels", self.labels)
+                size = meta.get("input_size", list(self.input_size))
+                self.input_size = (int(size[0]), int(size[1]))
+                self.normalisation = meta.get("normalisation", "raw_0_255")
+                self.temperature = float(meta.get("temperature", 1.0))
+                self.output_is_logits = str(meta.get("output", "logits")).lower() != "softmax"
 
-    def classify_image(self, pil_image: Image.Image) -> Dict[str, Any]:
+            self.interpreter = tf.lite.Interpreter(model_path=self.model_path)
+            self.interpreter.allocate_tensors()
+        except Exception as exc:  # noqa: BLE001
+            self.interpreter = None
+            self.model_error = f"Could not load the currency model: {exc}"
+
+    @property
+    def model_available(self) -> bool:
+        return self.interpreter is not None
+
+    def _preprocess(self, image: Image.Image) -> np.ndarray:
+        """Resize and normalise exactly the way training did.
+
+        ``raw_0_255`` is the default for the shipped model: MobileNetV3 is
+        built with ``include_preprocessing=True``, so rescaling lives inside
+        the TFLite graph. Dividing again here would double-scale the input and
+        silently destroy accuracy.
         """
-        Classifies currency image using color histogram profiling and aspect ratios.
-        """
-        img_rgb = np.array(pil_image.convert("RGB"))
-        mean_colors = img_rgb.mean(axis=(0, 1))
-        r, g, b = mean_colors[:3]
-
-        # Calculate Saturation & Brightness
-        max_c = max(r, g, b)
-        min_c = min(r, g, b)
-        delta = max_c - min_c
-        sat = 0 if max_c == 0 else delta / max_c
-
-        # Heuristic matching
-        if sat < 0.16 and max_c > 70:
-            key = "500"
-            conf = 97
-        elif b > r and b > 105:
-            key = "50"
-            conf = 95
-        elif r > 115 and g > 115 and b < 95:
-            key = "200"
-            conf = 96
-        elif r > 110 and b < 85 and g < 100:
-            key = "10"
-            conf = 94
-        elif abs(r - b) < 35 and g < r and g < b:
-            key = "100"
-            conf = 96
+        resized = image.convert("RGB").resize(self.input_size, Image.BILINEAR)
+        array = np.asarray(resized, dtype=np.float32)
+        if self.normalisation == "raw_0_255":
+            pass
+        elif self.normalisation == "minus1_1":
+            array = (array / 127.5) - 1.0
+        elif self.normalisation == "0_1":
+            array = array / 255.0
         else:
-            key = "500"
-            conf = 91
+            raise ValueError(f"Unsupported normalisation: {self.normalisation}")
+        return np.expand_dims(array, axis=0)
 
-        spec = self.CURRENCY_SPECS[key]
+    def _predict(self, image: Image.Image) -> np.ndarray:
+        assert self.interpreter is not None
+        input_details = self.interpreter.get_input_details()
+        output_details = self.interpreter.get_output_details()
+        self.interpreter.set_tensor(input_details[0]["index"], self._preprocess(image))
+        self.interpreter.invoke()
+        output = np.asarray(
+            self.interpreter.get_tensor(output_details[0]["index"])[0], dtype=np.float32
+        )
+        # The exported model returns logits. Temperature scaling is applied here
+        # so the threshold decision uses calibrated probabilities.
+        return self._to_probabilities(output)
+
+    def _to_probabilities(self, output: np.ndarray) -> np.ndarray:
+        if self.output_is_logits:
+            scaled = output / max(self.temperature, 1e-3)
+            scaled = scaled - scaled.max()
+            exp = np.exp(scaled)
+            return exp / exp.sum()
+        if self.temperature and abs(self.temperature - 1.0) > 1e-6:
+            # Already-softmaxed output: re-calibrate with the stored temperature.
+            clipped = np.clip(output, 1e-12, 1.0)
+            logits = np.log(clipped) / max(self.temperature, 1e-3)
+            logits = logits - logits.max()
+            exp = np.exp(logits)
+            return exp / exp.sum()
+        return output
+
+    # --------------------------------------------------------------- classify
+    def classify_image(self, pil_image: Image.Image) -> Dict[str, Any]:
+        """Classify a note or coin, honestly.
+
+        Returns a ``status`` of ``ok``, ``uncertain``, ``unknown``,
+        ``model_error`` or ``model_unavailable``. Confidence is only reported
+        when a model ran and returned finite numbers.
+        """
+        if not self.model_available:
+            return {
+                "status": "model_unavailable",
+                "key": None,
+                "denomination": None,
+                "confidence": None,
+                "top2": [],
+                "message": self.model_error
+                or "No currency model is installed in this build.",
+                "is_authenticity_check": False,
+                "disclaimer": (
+                    "Identification aid only. This app cannot verify whether a note "
+                    "is genuine."
+                ),
+            }
+
+        probabilities = self._predict(pil_image)
+
+        # A NaN/Inf logit survives every `< threshold` comparison, so the old
+        # path would report "ok" with a NaN confidence. Refuse the frame.
+        if not np.isfinite(probabilities).all():
+            return {
+                "status": "model_error",
+                "key": None,
+                "denomination": None,
+                "confidence": None,
+                "top2": [],
+                "message": "The model returned an invalid score. Try again.",
+                "is_authenticity_check": False,
+                "disclaimer": (
+                    "Identification aid only. This app cannot verify whether a note "
+                    "is genuine."
+                ),
+            }
+
+        order = np.argsort(probabilities)[::-1]
+        top1_index = int(order[0])
+        top1_key = self.labels[top1_index] if top1_index < len(self.labels) else "unknown"
+        top1_probability = float(probabilities[top1_index])
+
+        top2 = []
+        for index in order[:2]:
+            index = int(index)
+            key = self.labels[index] if index < len(self.labels) else "unknown"
+            top2.append({"key": key, "label": self._label(key), "probability": round(float(probabilities[index]), 4)})
+
+        margin = float(probabilities[order[0]] - probabilities[order[1]]) if len(order) > 1 else 1.0
+
+        if top1_key == "unknown":
+            status = "unknown"
+        elif top1_probability < CONFIDENCE_THRESHOLD or margin < MARGIN_THRESHOLD:
+            status = "uncertain"
+        else:
+            status = "ok"
+
+        spec = CURRENCY_SPECS.get(top1_key)
         return {
-            "key": key,
-            "denomination": spec["name"],
-            "confidence": conf,
-            "series": spec["series"],
-            "color": spec["color"],
-            "motif": spec["motif"],
-            "tactile_mark": spec["tactile_mark"],
-            "haptic_pattern": spec["haptic_pattern"],
-            "security_checklist": spec["security_checklist"]
+            "status": status,
+            "key": top1_key,
+            "denomination": spec["name"] if spec else "Not a recognised note or coin",
+            "confidence": round(top1_probability, 4),
+            "margin": round(margin, 4),
+            "top2": top2,
+            "spec": spec,
+            "is_authenticity_check": False,
+            "disclaimer": (
+                "Identification aid only. This app cannot verify whether a note is "
+                "genuine. Check the tactile marks or ask a bank."
+            ),
         }
 
-    def get_medicine_info(self, key: str) -> Dict[str, str]:
-        return self.MEDICINES.get(key, self.MEDICINES["pcm"])
+    @staticmethod
+    def _label(key: str) -> str:
+        spec = CURRENCY_SPECS.get(key)
+        return spec["name"] if spec else "Not currency"
+
+    def get_spec(self, key: str) -> Optional[Dict[str, Any]]:
+        return CURRENCY_SPECS.get(key)

@@ -1,15 +1,41 @@
 """
-Sahaaya AI — Augmentative & Alternative Communication (AAC) Engine (Pure Python)
-Multilingual Indian communication board with situation presets and 180-degree flip cards.
+Sahaaya AI - Augmentative & Alternative Communication (AAC) prototype.
+
+Only five languages are actually translated. The old UI offered nine and
+silently substituted Hindi for the other four, which is a correctness bug: a
+Marathi user would be shown Hindi text without being told. The engine now
+reports the language it actually returned and flags any fallback.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
+#: Languages present in every phrase dictionary below.
+SUPPORTED_LANGUAGES: Dict[str, str] = {
+    "en": "English",
+    "hi": "Hindi",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "kn": "Kannada",
+}
+
+LANGUAGE_ALIASES = {
+    "english": "en",
+    "hindi": "hi",
+    "tamil": "ta",
+    "telugu": "te",
+    "kannada": "kn",
+    "bengali": "bn",
+    "malayalam": "ml",
+    "marathi": "mr",
+    "gujarati": "gu",
+}
 
 
 class SahaayaAACEngine:
-    """
-    100% Python AAC Engine designed for nonspeaking, speech-impaired, and deaf citizens.
-    Features culturally relevant Indian communication situations and 180° flip dialogue cards.
+    """AAC phrase board for the prototype.
+
+    This module is not part of the blind/low-vision v1 product scope. It is
+    kept because the existing prototype still exposes it.
     """
 
     SITUATIONS = {
@@ -137,8 +163,46 @@ class SahaayaAACEngine:
     def get_phrases(self, situation: str) -> List[Dict[str, str]]:
         return self.SITUATIONS.get(situation, self.SITUATIONS["🏥 Clinic / Hospital / Chemist"])
 
+    @staticmethod
+    def resolve_language(lang: str) -> str:
+        """Map a UI label or code to a two-letter code."""
+        if not lang:
+            return "en"
+        key = lang.strip().lower()
+        if key in SUPPORTED_LANGUAGES:
+            return key
+        return LANGUAGE_ALIASES.get(key, key[:2])
+
+    def get_translation(self, phrase_dict: Dict[str, str], lang: str) -> Dict[str, Any]:
+        """Return the phrase plus an explicit fallback marker.
+
+        ``fallback_from`` is ``None`` when the requested language exists. If it
+        does not, the caller must tell the user which language was substituted.
+        """
+        code = self.resolve_language(lang)
+        if code in phrase_dict and phrase_dict[code].strip():
+            return {
+                "text": phrase_dict[code],
+                "language_code": code,
+                "language_name": SUPPORTED_LANGUAGES.get(code, code),
+                "fallback_from": None,
+                "supported": True,
+            }
+
+        fallback_code = "hi" if phrase_dict.get("hi") else "en"
+        return {
+            "text": phrase_dict.get(fallback_code, ""),
+            "language_code": fallback_code,
+            "language_name": SUPPORTED_LANGUAGES.get(fallback_code, fallback_code),
+            "fallback_from": lang,
+            "supported": False,
+        }
+
     def get_translated_text(self, phrase_dict: Dict[str, str], lang: str) -> str:
-        lang_key = lang.lower()[:2]
-        if lang_key in phrase_dict:
-            return phrase_dict[lang_key]
-        return phrase_dict.get("hi", phrase_dict.get("en", ""))
+        """Backwards-compatible string accessor.
+
+        Prefer :meth:`get_translation` when the UI needs to warn about a
+        fallback.
+        """
+        return self.get_translation(phrase_dict, lang)["text"]
+

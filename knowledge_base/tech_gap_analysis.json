@@ -1,46 +1,57 @@
 {
+  "metadata": {
+    "last_reviewed": "2026-11-18",
+    "verification_status": "needs-review",
+    "notes": [
+      "This file records competitor gaps that were observed or reported in the original project.",
+      "It is not used to generate answers. Competitive claims must be re-checked against a dated source before publication.",
+      "The previous version paired every gap with a 'Sahaaya AI solution' that the code did not implement, including counterfeit detection and real-time street navigation. Those claims were removed."
+    ]
+  },
   "existing_technologies_and_gaps": [
     {
-      "technology": "RBI MANI App (Mobile Aided Note Identifier)",
-      "developer": "Reserve Bank of India (RBI)",
-      "intended_purpose": "Identify Indian banknotes offline via phone camera for visually impaired citizens.",
-      "critical_drawbacks": [
-        "No Counterfeit Detection: Only scans denomination pattern, completely unable to distinguish genuine notes from fake/counterfeit notes.",
-        "Zero Support for Coins: Entirely incapable of identifying ₹1, ₹2, ₹5, ₹10, or ₹20 coins.",
-        "Performance Fluctuations: High failure rates in dim Indian lighting, or when notes are soiled, torn, or crumpled.",
-        "Struggles with Older Banknotes: Optimized for newer Gandhi series, fails frequently on older circulation currency.",
-        "Voice Assistant Search Barrier: Voice triggers often fail because the app is named 'MANI' instead of 'Money'."
+      "technology": "RBI MANI (Mobile Aided Note Identifier)",
+      "developer": "Reserve Bank of India",
+      "intended_purpose": "Offline identification of Indian banknote denominations for visually impaired users.",
+      "documented_scope": "RBI states that MANI does not authenticate banknotes and that user discretion is advised.",
+      "observed_gaps": [
+        "Banknotes only; no coin identification.",
+        "Not an authentication or counterfeit-detection tool.",
+        "Performance varies with lighting, crumpling and older series notes."
       ],
-      "sahaaya_ai_solution": "Identifies banknotes AND coins (including 12-sided ₹20 dodecagon); includes tactile security checklist (bleed lines, watermark, color-shifting thread); haptic vibration rhythms tell denomination without audio in noisy markets."
+      "verification_status": "official-source-checked",
+      "source_url": "https://indiancurrency.rbi.org.in/visual-impairment"
     },
     {
-      "technology": "Kibo (by Trestle Labs)",
+      "technology": "Kibo (Trestle Labs)",
       "developer": "Trestle Labs, India",
-      "intended_purpose": "Digitize, scan, and read printed and handwritten documents across 12+ Indian regional languages.",
-      "gaps_in_practice": "Hardware scanner setup is bulky for daily travel; high institutional pricing limits personal ownership; requires structured educational/library setup.",
-      "sahaaya_ai_solution": "Lightweight, zero-cost smartphone web & camera OCR with instant audio readout and automatic classroom comprehension quiz generator."
+      "intended_purpose": "Scan and read printed documents, including Indian languages.",
+      "observed_gaps": [
+        "Institutional or hardware-assisted workflow rather than a phone-only offline reader.",
+        "Pricing and setup can limit personal ownership."
+      ],
+      "verification_status": "needs-review"
     },
     {
-      "technology": "SmartCane (IIT Delhi & ALIMCO)",
-      "developer": "ASSISTECH Lab, IIT Delhi",
-      "intended_purpose": "Ultrasonic attachment on white cane detecting chest-to-head obstacles up to 3 meters away.",
-      "gaps_in_practice": "Cannot detect drop-offs, potholes, or open storm drains (nalas) beneath ground level; difficult to distinguish overhead electric live wires.",
-      "sahaaya_ai_solution": "Safer Journey Companion using real-time computer vision + edge luminosity analysis to detect ground depressions, open nalas, and hanging wires with tactile haptic alarms and emergency GPS SOS."
+      "technology": "SmartCane",
+      "developer": "ASSISTECH, IIT Delhi, with ALIMCO",
+      "intended_purpose": "Ultrasonic obstacle detection attached to a white cane.",
+      "observed_gaps": [
+        "Detects above-ground obstacles; it is not a drop-off or pothole detector.",
+        "It is a hardware device, not a phone app."
+      ],
+      "verification_status": "needs-review"
     },
     {
-      "technology": "Annie (by Thinkerbell Labs)",
-      "developer": "Thinkerbell Labs, India",
-      "intended_purpose": "Interactive self-learning Braille hardware device for visually impaired children.",
-      "gaps_in_practice": "Priced for institutions and NGO donation programs; unaffordable for low-income rural households in UP/Bihar out-of-pocket.",
-      "sahaaya_ai_solution": "Free browser-based screen reader, tactile audio learning, and multi-format lesson delivery for kids on low-cost Android smartphones."
-    },
-    {
-      "technology": "Mainstream Western AAC Apps (Proloquo2Go, TouchChat)",
-      "developer": "Western Assistive Tech Companies",
-      "intended_purpose": "Augmentative and Alternative Communication for nonspeaking individuals.",
-      "gaps_in_practice": "Prohibitive costs ($100 - $300 subscription); alien cultural icons; lacking Indian languages, colloquial phrases, and local market/transport scenarios.",
-      "sahaaya_ai_solution": "Pre-configured Indian AAC board featuring Auto-rickshaw, Kirana/Ration shops, Clinics, and Government offices across 9 Indian languages with 180° flip card view."
+      "technology": "General-purpose scene assistants (for example Seeing AI, Lookout, Envision)",
+      "developer": "Various",
+      "intended_purpose": "Scene description, OCR and object recognition.",
+      "observed_gaps": [
+        "Often cloud-dependent or subscription-based.",
+        "Not designed around Indian currency, coins and scheme paperwork.",
+        "English-first behaviour in several flows."
+      ],
+      "verification_status": "needs-review"
     }
   ]
 }
-

@@ -1,0 +1,51 @@
+name: Feature request
+description: Propose a feature, dataset change, or model change.
+title: "feat: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the blind or low-vision user's task, not the implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Is this in v1 scope?
+      options:
+        - Yes - currency, documents, schemes, emergency
+        - No - navigation, counterfeit detection, deafblind, ISL, AAC
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence plan
+      description: How will we know it works? Test, benchmark, citation, or pilot?
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and privacy impact
+      description: Could a wrong output cause harm? What data leaves the device?
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I read docs/SAFETY.md and docs/CLAIMS_MATRIX.md.
+          required: true
+        - label: This request does not add an unsupported claim.
+          required: true

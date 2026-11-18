@@ -1,39 +1,63 @@
-# Sahaaya AI - Git Ignore
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
 .venv/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
 *.egg-info/
-.installed.cfg
-*.egg
+build/
+dist/
 
-# Archive files
-*.zip
-*.tar.gz
-
-# Streamlit secrets (protect API keys)
+# Secrets - never commit
+.env
+.env.*
+!.env.example
 .streamlit/secrets.toml
+*.keystore
+*.jks
+android/key.properties
 
-# IDE & OS
+# Model artifacts and datasets (large / not redistributable)
+models/**/*.tflite
+models/**/*.keras
+models/**/*.h5
+models/**/*.onnx
+models/**/*.pb
+android/app/src/main/assets/currency/currency_model.tflite
+android/app/src/main/assets/currency/currency_model.json
+artifacts/
+data/currency/dataset/
+data/currency/raw/
+benchmarks/results/*.png
+benchmarks/results/*.jpg
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDE and OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 *.log
+
+# Archives
+*.zip
+*.tar.gz

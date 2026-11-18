@@ -1,0 +1,82 @@
+name: Model evaluation
+
+on:
+  pull_request:
+    paths:
+      - "ml/**"
+      - "models/**"
+      - "benchmarks/**"
+      - ".github/workflows/ml-eval.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Detect model artifact
+        id: detect
+        run: |
+          if [ -f models/currency/currency_model.tflite ]; then
+            echo "present=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=no" >> "$GITHUB_OUTPUT"
+            echo "No currency model committed. Skipping evaluation." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Install ML dependencies
+        if: steps.detect.outputs.present == 'yes'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ml/requirements.txt
+
+      - name: Evaluate model
+        if: steps.detect.outputs.present == 'yes'
+        run: |
+          python ml/currency/evaluate.py \
+            --model models/currency/currency_model.tflite \
+            --data data/currency/dataset \
+            --output benchmarks/results/currency_eval.json
+
+      - name: Enforce thresholds
+        if: steps.detect.outputs.present == 'yes'
+        run: |
+          python - <<'PY'
+          import json, sys
+          with open('benchmarks/results/currency_eval.json', encoding='utf-8') as handle:
+              result = json.load(handle)
+          thresholds = {
+              'top1_clean': 0.97,
+              'top1_hard': 0.90,
+              'top2_hard': 0.97,
+              'unknown_auroc': 0.95,
+              'ece': 0.05,
+          }
+          failed = []
+          for key, minimum in thresholds.items():
+              value = result.get(key)
+              if value is None:
+                  failed.append(f'{key}: missing')
+              elif value < minimum:
+                  failed.append(f'{key}: {value:.3f} < {minimum}')
+          if failed:
+              print('\n'.join(failed))
+              sys.exit(1)
+          print('all thresholds met')
+          PY
+
+      - name: Upload evaluation result
+        if: steps.detect.outputs.present == 'yes'
+        uses: actions/upload-artifact@v4
+        with:
+          name: currency-eval
+          path: benchmarks/results/currency_eval.json

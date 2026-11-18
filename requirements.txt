@@ -1,8 +1,16 @@
-streamlit>=1.30.0
-gTTS>=2.4.0
-Pillow>=10.0.0
-numpy>=1.24.0
-requests>=2.31.0
-google-generativeai>=0.4.0
-openai>=1.12.0
-opencv-python-headless>=4.8.0
+# Runtime dependencies for the legacy Streamlit prototype.
+# The production Android client does not use these.
+streamlit~=1.41
+gTTS~=2.5
+Pillow~=11.0
+numpy~=2.1
+opencv-python-headless~=4.10
+openai~=1.59
+google-genai~=1.0
+
+# Offline OCR. RapidOCR bundles its own ONNX models and needs no system binary.
+rapidocr-onnxruntime~=1.4
+
+# Optional second OCR engine. Requires the `tesseract` system binary and
+# language packs; the app reports "engine_unavailable" if it is missing.
+pytesseract~=0.3

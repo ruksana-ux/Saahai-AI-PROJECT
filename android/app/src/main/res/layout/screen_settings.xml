@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/settings_language"
+            android:text="@string/settings_language" />
+
+        <Spinner
+            android:id="@+id/settings_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/language_labels"
+            android:minHeight="56dp" />
+
+        <TextView
+            android:id="@+id/settings_rate_value"
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:labelFor="@id/settings_rate"
+            android:text="@string/settings_speech_rate" />
+
+        <SeekBar
+            android:id="@+id/settings_rate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="20"
+            android:minHeight="56dp" />
+
+        <Switch
+            android:id="@+id/settings_haptics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
+            android:text="@string/settings_haptics" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_haptics_summary"
+            android:textColor="@color/muted"
+            android:textSize="14sp" />
+
+        <Switch
+            android:id="@+id/settings_telemetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:minHeight="56dp"
+            android:text="@string/settings_telemetry" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_telemetry_summary"
+            android:textColor="@color/muted"
+            android:textSize="14sp" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_tactile_title" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_tactile_body" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_data_title" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_data_body" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_emergency_title" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_emergency_body" />
+
+        <Button
+            android:id="@+id/btn_call_112"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/settings_emergency_call" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_about_title" />
+
+        <TextView
+            android:id="@+id/settings_version"
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/settings_model_status"
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/TextAppearance.Sahaaya.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/settings_scope_note" />
+
+        <Button
+            android:id="@+id/btn_open_accessibility"
+            style="@style/Widget.Sahaaya.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_open_accessibility" />
+    </LinearLayout>
+</ScrollView>

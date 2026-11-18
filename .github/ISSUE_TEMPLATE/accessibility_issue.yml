@@ -1,0 +1,62 @@
+name: Accessibility issue
+description: A task cannot be completed with TalkBack, haptics, or at large text sizes.
+title: "a11y: "
+labels: ["accessibility", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Accessibility bugs block release. Please be specific about the task and the
+        assistive technology you used.
+  - type: dropdown
+    id: task
+    attributes:
+      label: Which task?
+      options:
+        - Identify a note or coin
+        - Read a document
+        - Ask about a scheme
+        - Emergency call
+        - Settings or onboarding
+    validations:
+      required: true
+  - type: dropdown
+    id: at
+    attributes:
+      label: Assistive technology
+      options:
+        - TalkBack
+        - Voice Access
+        - Switch Access
+        - Large text / magnification
+        - Bluetooth headset speech
+        - Haptics only
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: barrier
+    attributes:
+      label: What is the barrier?
+      description: What does TalkBack say, or what cannot be reached?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen?
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed personal data and secrets from this report.
+          required: true
